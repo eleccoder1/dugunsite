@@ -1,0 +1,13 @@
+# config.php ve lib.php dışarıdan açılamaz
+<FilesMatch "^(config|lib)\.php$|^\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+<IfModule mod_headers.c>
+  Header always set Cache-Control "no-store"
+</IfModule>

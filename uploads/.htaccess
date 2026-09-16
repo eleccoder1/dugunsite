@@ -1,0 +1,24 @@
+# Yüklenen dosyalar yalnızca görüntülenir, asla çalıştırılmaz
+Options -Indexes
+<FilesMatch "\.(?i:php[0-9]?|phtml|phar|pl|py|cgi|sh|asp|aspx|jsp|shtml|htm|html|js|svg)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+<FilesMatch "^index\.html$">
+  <IfModule mod_authz_core.c>
+    Require all granted
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+  </IfModule>
+</FilesMatch>
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Content-Security-Policy "default-src 'none'; img-src 'self'; media-src 'self'; sandbox"
+</IfModule>

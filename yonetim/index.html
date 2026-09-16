@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Yönetim · Elif & Yusuf Çağrı</title>
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&display=swap&subset=latin-ext" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css?v=1">
+<link rel="stylesheet" href="admin.css?v=1">
+</head>
+<body class="admin">
+
+<div class="login marble" id="login" hidden>
+  <form class="login-card" id="loginForm">
+    <img src="../assets/img/arma.svg" alt="" class="login-crest">
+    <h1 class="h2">Yönetim paneli</h1>
+    <label class="field"><span>Şifre</span><input type="password" name="password" autocomplete="current-password" required></label>
+    <p class="form-err" role="alert"></p>
+    <button class="btn btn-wide" type="submit">Giriş yap</button>
+    <a class="linkbtn" href="../">Davetiyeye dön</a>
+  </form>
+</div>
+
+<div class="app" id="app" hidden>
+  <header class="a-head">
+    <p class="brand">Elif <em>&amp;</em> Yusuf Çağrı</p>
+    <div class="a-head-r">
+      <a class="linkbtn" href="../" target="_blank" rel="noopener">Siteyi aç</a>
+      <button type="button" class="linkbtn" id="logout">Çıkış</button>
+    </div>
+  </header>
+  <nav class="a-tabs" id="tabs">
+    <button type="button" data-tab="ozet" class="on">Özet</button>
+    <button type="button" data-tab="katilim">Katılım</button>
+    <button type="button" data-tab="anilar">Anı defteri</button>
+    <button type="button" data-tab="album">Albüm</button>
+    <button type="button" data-tab="oyun">Oyun</button>
+    <button type="button" data-tab="ayarlar">Ayarlar</button>
+  </nav>
+
+  <main class="a-main">
+    <!-- ÖZET -->
+    <section data-panel="ozet">
+      <div class="stats" id="stats"></div>
+      <div class="a-box" id="storage"></div>
+    </section>
+
+    <!-- KATILIM -->
+    <section data-panel="katilim" hidden>
+      <div class="a-bar">
+        <input type="search" id="rsvpSearch" placeholder="İsim ara" aria-label="İsim ara">
+        <select id="rsvpFilter" aria-label="Duruma göre filtrele">
+          <option value="">Tüm yanıtlar</option>
+          <option value="geliyor">Katılacaklar</option>
+          <option value="gelmiyor">Katılamayacaklar</option>
+          <option value="belki">Belirsizler</option>
+        </select>
+        <a class="btn btn-sm" href="../api/admin.php?a=rsvp_csv">Excel'e aktar</a>
+      </div>
+      <p class="muted small" id="rsvpSum"></p>
+      <div class="table-wrap"><table class="a-table" id="rsvpTable"></table></div>
+    </section>
+
+    <!-- ANI DEFTERİ -->
+    <section data-panel="anilar" hidden>
+      <div class="a-list" id="memList"></div>
+    </section>
+
+    <!-- ALBÜM -->
+    <section data-panel="album" hidden>
+      <div class="a-bar">
+        <select id="mediaFilter" aria-label="Filtre">
+          <option value="">Tüm dosyalar</option>
+          <option value="pending">Onay bekleyenler</option>
+        </select>
+        <a class="btn btn-sm" href="../api/admin.php?a=media_zip&kind=image" id="zipImg">Fotoğrafları indir (ZIP)</a>
+        <a class="btn btn-sm btn-line" href="../api/admin.php?a=media_zip&kind=video" id="zipVid">Videoları indir (ZIP)</a>
+      </div>
+      <p class="muted small">Çok büyük albümlerde ZIP hazırlanırken zaman aşımı olabilir. O durumda cPanel &gt; Dosya Yöneticisi'nde <b>public_html/uploads/album</b> klasörünü sıkıştırıp indirin.</p>
+      <div class="a-grid" id="mediaGrid"></div>
+      <button type="button" class="btn btn-line" id="mediaMore" hidden>Daha fazla göster</button>
+    </section>
+
+    <!-- OYUN -->
+    <section data-panel="oyun" hidden>
+      <div class="a-bar"><button type="button" class="btn btn-sm btn-line" id="quizReset">Tüm skorları sıfırla</button></div>
+      <div class="table-wrap"><table class="a-table" id="quizTable"></table></div>
+    </section>
+
+    <!-- AYARLAR -->
+    <section data-panel="ayarlar" hidden>
+      <div class="a-box">
+        <h2 class="h3">Site özellikleri</h2>
+        <div id="toggles"></div>
+      </div>
+      <div class="a-box">
+        <h2 class="h3">Masalar için QR kod</h2>
+        <p class="muted">Misafirler bu kodu okutunca doğrudan albüm sayfası açılır ve fotoğraf yükleyebilirler.</p>
+        <div class="qr-row">
+          <div id="qr" class="qr"></div>
+          <div>
+            <p><code id="qrUrl"></code></p>
+            <button type="button" class="btn btn-sm" id="qrDl">QR kodu indir</button>
+          </div>
+        </div>
+      </div>
+      <form class="a-box form" id="pwForm">
+        <h2 class="h3">Şifre değiştir</h2>
+        <label class="field"><span>Mevcut şifre</span><input type="password" name="current" autocomplete="current-password" required></label>
+        <label class="field"><span>Yeni şifre (en az 8 karakter)</span><input type="password" name="new" autocomplete="new-password" minlength="8" required></label>
+        <p class="form-err" role="alert"></p>
+        <button class="btn" type="submit">Şifreyi değiştir</button>
+      </form>
+    </section>
+  </main>
+</div>
+
+<div class="lightbox" id="lb" hidden>
+  <button type="button" class="lb-close" id="lbClose" aria-label="Kapat">×</button>
+  <figure class="lb-fig" id="lbFig"></figure>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+<script src="admin.js?v=1" defer></script>
+</body>
+</html>
