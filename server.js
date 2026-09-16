@@ -3,7 +3,9 @@ const http = require("http");
 const port = process.env.PORT || 3000;
 
 const server = http.createServer((req, res) => {
-  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+  res.writeHead(200, {
+    "Content-Type": "text/html; charset=utf-8"
+  });
 
   res.end(`
     <!DOCTYPE html>
@@ -14,14 +16,14 @@ const server = http.createServer((req, res) => {
         <title>Düğün Sitemiz</title>
       </head>
       <body style="
-        margin:0;
-        min-height:100vh;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-family:Arial,sans-serif;
-        background:#faf7f4;
-        text-align:center;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial, sans-serif;
+        background: #faf7f4;
+        text-align: center;
       ">
         <div>
           <h1>💍 Düğün Sitemiz</h1>
@@ -33,5 +35,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, "0.0.0.0", () => {
-  console.log(\`Server ${port} portunda çalışıyor.\`);
+  console.log(`Server ${port} portunda çalışıyor.`);
 });
