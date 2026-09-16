@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elif & Yusuf Çağrı · Düğün Davetiyesi</title>
+<meta name="description" content="1 Kasım 2026 Pazar, 19:00 — Lebiderya Düğün Salonu, İzmit">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F6F6F4">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Elif & Yusuf Çağrı · Düğün Davetiyesi">
+<meta property="og:description" content="1 Kasım 2026 Pazar, 19:00 — Lebiderya Düğün Salonu, İzmit">
+<meta property="og:url" content="https://elifyusufcagri.com/">
+<meta property="og:image" content="https://elifyusufcagri.com/assets/img/paylasim.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&display=swap&subset=latin-ext" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css?v=1">
+</head>
+<body>
+
+<!-- ═════════ ZARF AÇILIŞI ═════════ -->
+<div class="intro" id="intro" hidden>
+  <div class="intro-stage">
+    <div class="env" id="env">
+      <div class="env-card" aria-hidden="true"></div>
+      <div class="env-front">
+        <div class="crest">
+          <img src="assets/img/arma.svg" alt="">
+          <span class="crest-l1" data-mono="0"></span>
+          <span class="crest-l2" data-mono="1"></span>
+        </div>
+        <p class="env-date" data-bind="tarihYazi"></p>
+        <p class="env-day" data-bind="gunYazi"></p>
+      </div>
+    </div>
+    <button type="button" class="btn btn-gold intro-open" id="introOpen">Davetiyeyi aç</button>
+    <button type="button" class="intro-skip" id="introSkip">Geç</button>
+  </div>
+</div>
+
+<!-- ═════════ ÜST MENÜ (masaüstü) ═════════ -->
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#davetiye"><span data-bind="gelin"></span> <em>&amp;</em> <span data-bind="damat"></span></a>
+    <nav class="toplinks" aria-label="Sayfalar">
+      <a href="#davetiye" data-nav="davetiye">Davetiye</a>
+      <a href="#anilar" data-nav="anilar">Anı defteri</a>
+      <a href="#album" data-nav="album">Albüm</a>
+      <a href="#oyun" data-nav="oyun">Oyun</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ═════════ DAVETİYE ═════════ -->
+<div class="page" data-page="davetiye">
+  <section class="hero marble">
+    <article class="card" id="card" aria-label="Davetiye">
+      <img class="card-art" src="assets/img/kemer.svg" alt="">
+      <div class="card-text">
+        <p class="cap" id="cDavet"></p>
+        <h1 class="names"><span data-bind="gelin"></span> <span class="amp">&amp;</span> <span data-bind="damat"></span></h1>
+        <p class="cap" id="cAile"></p>
+        <div class="card-when">
+          <p class="cap"><span data-bind="tarihYazi"></span> <span class="small" data-bind="gunYazi"></span></p>
+          <p class="cap">SAAT: <span data-bind="saatYazi"></span></p>
+        </div>
+        <p class="venue-script" data-bind="mekan.ad"></p>
+        <p class="cap" data-bind="mekan.sehir"></p>
+      </div>
+    </article>
+    <p class="hero-hint">Aşağı kaydırın</p>
+  </section>
+
+  <section class="blk" id="gerisayim">
+    <img class="sprig" src="assets/img/dal.svg" alt="">
+    <p class="lead" data-bind="davetMesaji"></p>
+    <div class="count" id="count" aria-live="polite"></div>
+  </section>
+
+  <section class="blk tint">
+    <img class="sprig" src="assets/img/dal.svg" alt="">
+    <h2 class="h2">Ailelerimiz</h2>
+    <div class="families" id="families"></div>
+  </section>
+
+  <section class="blk">
+    <img class="sprig" src="assets/img/dal.svg" alt="">
+    <h2 class="h2">Program</h2>
+    <ol class="timeline" id="timeline"></ol>
+  </section>
+
+  <section class="blk tint">
+    <img class="sprig" src="assets/img/dal.svg" alt="">
+    <h2 class="h2">Mekân</h2>
+    <p class="venue-big" data-bind="mekan.ad"></p>
+    <p class="muted" data-bind="mekan.adres"></p>
+    <div class="map" id="map"></div>
+    <div class="row-btns">
+      <a class="btn" id="mapLink" target="_blank" rel="noopener">Yol tarifi al</a>
+      <a class="btn btn-line" id="webLink" target="_blank" rel="noopener">Mekânın sitesi</a>
+    </div>
+  </section>
+
+  <section class="blk" id="katilim">
+    <img class="sprig" src="assets/img/dal.svg" alt="">
+    <h2 class="h2">Katılım durumu</h2>
+    <p class="muted">Hazırlıklarımızı planlayabilmemiz için lütfen bize haber verin.</p>
+    <form class="form" id="rsvpForm" novalidate>
+      <div class="grid2">
+        <label class="field"><span>Adınız</span><input name="first_name" autocomplete="given-name" required maxlength="80"></label>
+        <label class="field"><span>Soyadınız</span><input name="last_name" autocomplete="family-name" required maxlength="80"></label>
+      </div>
+      <fieldset class="choice">
+        <legend>Gelebilecek misiniz?</legend>
+        <label><input type="radio" name="status" value="geliyor"><span>Katılacağım</span></label>
+        <label><input type="radio" name="status" value="gelmiyor"><span>Katılamayacağım</span></label>
+        <label><input type="radio" name="status" value="belki"><span>Henüz bilmiyorum</span></label>
+      </fieldset>
+      <label class="field" id="guestField"><span>Yanınızda kaç kişi gelecek?</span>
+        <select name="guests"><option value="0">Sadece ben</option><option value="1">+1 kişi</option><option value="2">+2 kişi</option><option value="3">+3 kişi</option><option value="4">+4 kişi</option><option value="5">+5 kişi</option><option value="6">+6 kişi</option></select>
+      </label>
+      <label class="field"><span>Telefon <i>(isteğe bağlı)</i></span><input name="phone" type="tel" autocomplete="tel" maxlength="30"></label>
+      <label class="field"><span>Notunuz <i>(isteğe bağlı)</i></span><textarea name="note" rows="3" maxlength="500"></textarea></label>
+      <p class="form-err" role="alert"></p>
+      <button class="btn btn-wide" type="submit">Yanıtımı gönder</button>
+    </form>
+    <div class="done" id="rsvpDone" hidden>
+      <p class="done-t">Yanıtınız bize ulaştı.</p>
+      <p class="muted" id="rsvpDoneText"></p>
+      <button type="button" class="linkbtn" id="rsvpEdit">Yanıtımı değiştir</button>
+    </div>
+  </section>
+
+  <footer class="closing marble">
+    <p class="closing-t">Sevgiyle bekliyoruz</p>
+    <p class="cap"><span data-bind="gelin"></span> &amp; <span data-bind="damat"></span></p>
+    <p class="cap small"><span data-bind="tarihYazi"></span></p>
+  </footer>
+</div>
+
+<!-- ═════════ ANI DEFTERİ ═════════ -->
+<div class="page" data-page="anilar" hidden>
+  <section class="blk pagehead">
+    <img class="sprig" src="assets/img/dal.svg" alt="">
+    <h2 class="h2">Anı defteri</h2>
+    <p class="muted">Bize birkaç satır bırakın; yıllar sonra tekrar okuyacağız.</p>
+    <form class="form" id="memForm" novalidate>
+      <label class="field"><span>Adınız</span><input name="author" maxlength="80" required autocomplete="name"></label>
+      <label class="field"><span>Mesajınız</span><textarea name="message" rows="4" maxlength="1500" required></textarea></label>
+      <div class="attach">
+        <label class="btn btn-line btn-sm"><input type="file" accept="image/*" id="memPhoto" hidden>Fotoğraf ekle</label>
+        <img id="memPreview" alt="" hidden>
+        <button type="button" class="linkbtn" id="memPhotoRemove" hidden>Fotoğrafı kaldır</button>
+      </div>
+      <p class="form-err" role="alert"></p>
+      <button class="btn btn-wide" type="submit">Mesajı gönder</button>
+    </form>
+    <p class="closed-note" id="memClosed" hidden>Anı defteri şu an yeni mesajlara kapalı.</p>
+  </section>
+  <section class="blk wide">
+    <div class="notes" id="notes"></div>
+    <p class="empty" id="notesEmpty" hidden>Henüz mesaj yok. İlk satırı siz yazın.</p>
+    <button type="button" class="btn btn-line" id="notesMore" hidden>Daha fazla göster</button>
+  </section>
+</div>
+
+<!-- ═════════ ALBÜM ═════════ -->
+<div class="page" data-page="album" hidden>
+  <section class="blk pagehead">
+    <img class="sprig" src="assets/img/dal.svg" alt="">
+    <h2 class="h2">Düğün albümü</h2>
+    <p class="muted">Çektiğiniz fotoğraf ve videoları buraya yükleyin, hepsi bizde toplansın.</p>
+    <div class="drop" id="drop">
+      <label class="field"><span>Adınız</span><input id="upName" maxlength="80" autocomplete="name"></label>
+      <label class="btn btn-wide" id="pickBtn"><input type="file" id="upFiles" accept="image/*,video/*" multiple hidden>Fotoğraf veya video seç</label>
+      <p class="muted small" id="upHint"></p>
+      <ul class="queue" id="queue"></ul>
+    </div>
+    <p class="closed-note" id="upClosed" hidden>Albüme yükleme şu an kapalı.</p>
+  </section>
+  <section class="blk wide">
+    <div class="gallery" id="gallery"></div>
+    <p class="empty" id="galleryEmpty" hidden>Albüm henüz boş. İlk kareyi siz ekleyin.</p>
+    <button type="button" class="btn btn-line" id="galleryMore" hidden>Daha fazla göster</button>
+  </section>
+</div>
+
+<!-- ═════════ OYUN ═════════ -->
+<div class="page" data-page="oyun" hidden>
+  <section class="blk pagehead">
+    <img class="sprig" src="assets/img/dal.svg" alt="">
+    <h2 class="h2">Bizi ne kadar tanıyorsunuz?</h2>
+    <div id="quiz"></div>
+  </section>
+  <section class="blk">
+    <h3 class="h3">Sıralama</h3>
+    <ol class="board" id="board"></ol>
+    <p class="empty" id="boardEmpty" hidden>Henüz kimse oynamadı.</p>
+  </section>
+</div>
+
+</main>
+
+<!-- ═════════ ALT MENÜ (mobil) ═════════ -->
+<nav class="tabbar" aria-label="Sayfalar">
+  <a href="#davetiye" data-nav="davetiye"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 6l9 7 9-7"/></svg><span>Davetiye</span></a>
+  <a href="#anilar" data-nav="anilar"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg><span>Anılar</span></a>
+  <a href="#album" data-nav="album"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-6-6-9 9"/></svg><span>Albüm</span></a>
+  <a href="#oyun" data-nav="oyun"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg><span>Oyun</span></a>
+</nav>
+
+<div class="lightbox" id="lb" hidden>
+  <button type="button" class="lb-close" id="lbClose" aria-label="Kapat">×</button>
+  <button type="button" class="lb-nav lb-prev" id="lbPrev" aria-label="Önceki">‹</button>
+  <figure class="lb-fig" id="lbFig"></figure>
+  <button type="button" class="lb-nav lb-next" id="lbNext" aria-label="Sonraki">›</button>
+  <div class="lb-bar">
+    <span id="lbInfo"></span>
+    <a id="lbDl" download>İndir</a>
+    <button type="button" id="lbDel" hidden>Sil</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/site-config.js?v=1"></script>
+<script src="assets/js/app.js?v=1"></script>
+</body>
+</html>
