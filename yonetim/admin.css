@@ -39,6 +39,14 @@ body.admin{padding:0;font-size:18px;background:var(--mist)}
 .pill.belki{border-color:var(--gold-hi);color:var(--gold-lo)}
 .del{background:none;border:0;color:var(--err);cursor:pointer;text-decoration:underline;font-size:15px;padding:4px}
 
+#quizQList{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.qedit .body{width:100%}
+.q-opts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.q-opt{display:flex;align-items:center;gap:10px}
+.q-opt input[type=radio]{flex:none;width:18px;height:18px}
+.q-opt-text{flex:1;min-height:40px;padding:6px 10px;border:1px solid var(--line);font-size:16px}
+.q-opt-del{flex:none;background:none;border:0;color:var(--err);font-size:20px;line-height:1;cursor:pointer;padding:4px 6px}
+
 .a-list{display:flex;flex-direction:column;gap:12px}
 .a-item{display:flex;gap:16px;background:#fff;border:1px solid var(--line);padding:16px;text-align:left}
 .a-item.pending{border-color:var(--gold);background:#FFFCF4}

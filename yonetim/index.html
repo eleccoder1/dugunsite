@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&display=swap&subset=latin-ext" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/site.css?v=4">
-<link rel="stylesheet" href="admin.css?v=4">
+<link rel="stylesheet" href="../assets/css/site.css?v=5">
+<link rel="stylesheet" href="admin.css?v=5">
 </head>
 <body class="admin">
 
@@ -87,6 +87,12 @@
 
     <!-- OYUN -->
     <section data-panel="oyun" hidden>
+      <div class="a-box">
+        <h2 class="h3">Oyun soruları</h2>
+        <p class="muted small">Sorular, şıklar ve doğru cevap burada düzenlenir; misafirler oyunu bu haliyle oynar.</p>
+        <div id="quizQList"></div>
+        <button type="button" class="btn btn-sm" id="quizQAdd">+ Yeni soru ekle</button>
+      </div>
       <div class="a-bar"><button type="button" class="btn btn-sm btn-line" id="quizReset">Tüm skorları sıfırla</button></div>
       <div class="table-wrap"><table class="a-table" id="quizTable"></table></div>
     </section>
@@ -126,6 +132,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
-<script src="admin.js?v=4" defer></script>
+<script src="admin.js?v=5" defer></script>
 </body>
 </html>

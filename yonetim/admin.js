@@ -166,7 +166,10 @@
 
   /* ─── oyun ─── */
   var quiz = [];
-  loaders.oyun = function () { api("quiz_list").then(function (d) { quiz = d.items; drawQuiz(); }).catch(function (e) { toast(e.message); }); };
+  loaders.oyun = function () {
+    api("quiz_list").then(function (d) { quiz = d.items; drawQuiz(); }).catch(function (e) { toast(e.message); });
+    loadQuizQ();
+  };
   function drawQuiz() {
     $("#quizTable").innerHTML = "<thead><tr><th>#</th><th>İsim</th><th>Skor</th><th>Tarih</th><th></th></tr></thead><tbody>" +
       (quiz.length ? quiz.map(function (q, i) {
@@ -181,6 +184,67 @@
   $("#quizReset").addEventListener("click", function () {
     if (!confirm("Tüm oyun skorları silinsin mi?")) return;
     api("quiz_reset", {}).then(function () { toast("Skorlar sıfırlandı."); loaders.oyun(); }).catch(function (x) { toast(x.message); });
+  });
+
+  /* ─── oyun soruları ─── */
+  var quizQ = [];
+  function loadQuizQ() { return api("quiz_questions_list").then(function (d) { quizQ = d.items; drawQuizQ(); }).catch(function (e) { toast(e.message); }); }
+  function questionCard(q, i, total) {
+    return '<div class="a-item qedit"><div class="body">' +
+      '<label class="field"><span>Soru</span><input class="q-soru" maxlength="300" value="' + esc(q.soru) + '"></label>' +
+      '<div class="q-opts">' + q.siklar.map(function (o, oi) {
+        return '<div class="q-opt"><input type="radio" class="q-dogru" data-oi="' + oi + '"' + (oi === q.dogru ? " checked" : "") + '>' +
+          '<input type="text" class="q-opt-text" maxlength="120" placeholder="Şık ' + (oi + 1) + '" value="' + esc(o) + '">' +
+          '<button type="button" class="q-opt-del" data-oi="' + oi + '" title="Şıkkı sil">×</button></div>';
+      }).join("") + "</div>" +
+      '<div class="acts">' +
+      '<button type="button" class="linkbtn q-opt-add">+ Şık ekle</button>' +
+      '<button type="button" class="q-save">Kaydet</button>' +
+      (i > 0 ? '<button type="button" class="q-up">↑</button>' : "") +
+      (i < total - 1 ? '<button type="button" class="q-down">↓</button>' : "") +
+      '<button type="button" class="danger q-del">Sil</button>' +
+      "</div></div></div>";
+  }
+  function drawQuizQ() {
+    $("#quizQList").innerHTML = quizQ.length ? quizQ.map(function (q, i) { return questionCard(q, i, quizQ.length); }).join("") : '<p class="muted">Henüz soru yok.</p>';
+  }
+  $("#quizQAdd").addEventListener("click", function () {
+    quizQ.push({ id: 0, soru: "", siklar: ["", ""], dogru: 0 });
+    drawQuizQ();
+  });
+  $("#quizQList").addEventListener("click", function (e) {
+    var card = e.target.closest(".qedit"); if (!card) return;
+    var idx = $$(".qedit", $("#quizQList")).indexOf(card);
+    var q = quizQ[idx]; if (!q) return;
+    if (e.target.classList.contains("q-opt-add")) {
+      if (q.siklar.length >= 6) { toast("En fazla 6 şık eklenebilir."); return; }
+      q.siklar.push(""); drawQuizQ(); return;
+    }
+    if (e.target.classList.contains("q-opt-del")) {
+      if (q.siklar.length <= 2) { toast("En az 2 şık olmalı."); return; }
+      var oi = +e.target.getAttribute("data-oi");
+      q.siklar.splice(oi, 1);
+      if (oi === q.dogru) q.dogru = 0;
+      else if (oi < q.dogru) q.dogru--;
+      drawQuizQ(); return;
+    }
+    if (e.target.classList.contains("q-up")) { api("quiz_question_move", { id: q.id, dir: "up" }).then(loadQuizQ).catch(function (x) { toast(x.message); }); return; }
+    if (e.target.classList.contains("q-down")) { api("quiz_question_move", { id: q.id, dir: "down" }).then(loadQuizQ).catch(function (x) { toast(x.message); }); return; }
+    if (e.target.classList.contains("q-del")) {
+      if (!q.id) { quizQ.splice(idx, 1); drawQuizQ(); return; }
+      if (!confirm("Bu soru kalıcı olarak silinsin mi?")) return;
+      api("quiz_question_delete", { id: q.id }).then(loadQuizQ).catch(function (x) { toast(x.message); });
+      return;
+    }
+    if (e.target.classList.contains("q-save")) {
+      var soru = $(".q-soru", card).value.trim();
+      var opts = $$(".q-opt-text", card).map(function (el) { return el.value.trim(); });
+      var dogruEl = card.querySelector(".q-dogru:checked");
+      var dogru = dogruEl ? +dogruEl.getAttribute("data-oi") : 0;
+      api("quiz_question_save", { id: q.id, soru: soru, siklar: opts, dogru: dogru })
+        .then(function () { toast("Soru kaydedildi."); loadQuizQ(); })
+        .catch(function (x) { toast(x.message); });
+    }
   });
 
   /* ─── ayarlar ─── */

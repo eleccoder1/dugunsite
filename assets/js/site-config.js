@@ -33,14 +33,7 @@ window.SITE = {
     { saat: "17:00", baslik: "Gelin alma", aciklama: "Araçlar erkek evinden hareket eder" },
     { saat: "19:00", baslik: "Karşılama", aciklama: "" },
     { saat: "20:00", baslik: "Nikâh töreni", aciklama: "" }
-  ],
-
-  // Quiz: "dogru" = doğru şıkkın sırası (0'dan başlar)
-  quiz: [
-    { soru: "İlk tanıştıkları yer neresi?", siklar: ["Okul", "Kafe", "Yıldız ailesi aracılığıyla :)", "İş yeri"], dogru: 2 },
-    { soru: "“Nereye gidelim?” sorusuna 47 seçenek sunan kim?", siklar: ["Elif", "Yusuf Çağrı", "İkisi de"], dogru: 1 },
-    { soru: "Acıkınca karakteri değişen kim?", siklar: ["Elif", "Yusuf Çağrı", "İkisi de"], dogru: 0 },
-    { soru: "“Sadece bakacağız” deyip en çok alışveriş yapan kim?", siklar: ["Elif", "Yusuf Çağrı", "İkisi de"], dogru: 2 },
-    { soru: "Yusuf'un Elif'e en sık söylediği cümle hangisi?", siklar: ["Ne kadar sürer?", "Nereye gidiyoruz?", "Sen bilirsin", "Ben hallederim"], dogru: 3 }
   ]
+
+  // Oyun soruları artık yönetim panelinden (Oyun sekmesi) düzenleniyor.
 };

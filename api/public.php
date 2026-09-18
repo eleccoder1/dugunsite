@@ -107,6 +107,16 @@ switch ($a) {
         out(array('ok' => true));
 
     /* ── quiz ── */
+    case 'quiz_questions':
+        $rows = q('SELECT id, soru, siklar, dogru FROM quiz_questions ORDER BY sira ASC, id ASC')->fetchAll();
+        $items = array();
+        foreach ($rows as $r) {
+            $siklar = json_decode($r['siklar'], true);
+            if (!is_array($siklar)) continue;
+            $items[] = array('id' => (int)$r['id'], 'soru' => $r['soru'], 'siklar' => array_values($siklar), 'dogru' => (int)$r['dogru']);
+        }
+        out(array('ok' => true, 'items' => $items));
+
     case 'quiz':
         method_post();
         if (!section_open('oyun_open')) fail('Oyun şu an kapalı.', 403);

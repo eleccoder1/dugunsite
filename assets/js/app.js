@@ -124,7 +124,7 @@
       loaded[page] = true;
       if (page === "anilar") loadNotes(true);
       if (page === "album") loadGallery(true);
-      if (page === "oyun") { cfgReady.then(function () { if (CFG.oyun_open) renderQuizStart(); else $("#oyunClosed").hidden = false; loadBoard(); }); }
+      if (page === "oyun") { cfgReady.then(function () { if (CFG.oyun_open) loadQuestions().then(renderQuizStart); else $("#oyunClosed").hidden = false; loadBoard(); }); }
     }
   }
   window.addEventListener("hashchange", route);
@@ -435,9 +435,12 @@
   });
 
   /* ─── quiz ─── */
-  var Q = S.quiz, qi = 0, score = 0, player = "";
+  var Q = [], qi = 0, score = 0, player = "";
+  function loadQuestions() {
+    return api("quiz_questions").then(function (d) { Q = d.items; }).catch(function () { Q = []; });
+  }
   function renderQuizStart() {
-    Q = S.quiz;
+    if (!Q.length) { $("#quiz").innerHTML = '<p class="muted">Oyun için henüz soru eklenmemiş.</p>'; return; }
     var nm = esc(store("ey_name") || "");
     $("#quiz").innerHTML = '<p class="muted">' + Q.length + ' soru. Bakalım bizi ne kadar yakından tanıyorsunuz.</p>' +
       '<form class="form" id="qStart"><label class="field"><span>Adınız</span><input name="n" maxlength="60" value="' + nm + '" required></label>' +

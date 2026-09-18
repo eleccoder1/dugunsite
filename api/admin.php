@@ -210,6 +210,69 @@ switch ($a) {
         db()->exec('DELETE FROM quiz_scores');
         out(array('ok' => true));
 
+    /* ── oyun soruları ── */
+    case 'quiz_questions_list':
+        require_admin(false);
+        $rows = q('SELECT id, soru, siklar, dogru, sira FROM quiz_questions ORDER BY sira ASC, id ASC')->fetchAll();
+        $items = array();
+        foreach ($rows as $r) {
+            $siklar = json_decode($r['siklar'], true);
+            $items[] = array(
+                'id' => (int)$r['id'], 'soru' => $r['soru'],
+                'siklar' => is_array($siklar) ? array_values($siklar) : array(),
+                'dogru' => (int)$r['dogru'], 'sira' => (int)$r['sira'],
+            );
+        }
+        out(array('ok' => true, 'items' => $items));
+
+    case 'quiz_question_save':
+        method_post();
+        require_admin();
+        $b = body();
+        $id = isset($b['id']) ? (int)$b['id'] : 0;
+        $soru = in_str('soru', 300);
+        $siklarIn = isset($b['siklar']) && is_array($b['siklar']) ? $b['siklar'] : array();
+        $siklar = array();
+        foreach ($siklarIn as $s) {
+            $s = clean_text(is_scalar($s) ? $s : '', 120);
+            if ($s !== '') $siklar[] = $s;
+        }
+        $dogru = isset($b['dogru']) && is_numeric($b['dogru']) ? (int)$b['dogru'] : -1;
+        if ($soru === '') fail('Soru metnini yazın.');
+        if (count($siklar) < 2 || count($siklar) > 6) fail('En az 2, en fazla 6 şık girin.');
+        if ($dogru < 0 || $dogru >= count($siklar)) fail('Doğru şıkkı seçin.');
+        $json = json_encode($siklar, JSON_UNESCAPED_UNICODE);
+        if ($id > 0 && q('SELECT id FROM quiz_questions WHERE id = ?', array($id))->fetch()) {
+            q('UPDATE quiz_questions SET soru=?, siklar=?, dogru=? WHERE id=?', array($soru, $json, $dogru, $id));
+        } else {
+            $maxSira = (int)q('SELECT COALESCE(MAX(sira),-1) FROM quiz_questions')->fetchColumn();
+            q('INSERT INTO quiz_questions (soru, siklar, dogru, sira, created_at) VALUES (?,?,?,?,NOW())', array($soru, $json, $dogru, $maxSira + 1));
+            $id = (int)db()->lastInsertId();
+        }
+        out(array('ok' => true, 'id' => $id));
+
+    case 'quiz_question_delete':
+        method_post();
+        require_admin();
+        q('DELETE FROM quiz_questions WHERE id = ?', array(in_int('id', 0, PHP_INT_MAX)));
+        out(array('ok' => true));
+
+    case 'quiz_question_move':
+        method_post();
+        require_admin();
+        $id = in_int('id', 0, PHP_INT_MAX);
+        $dir = in_str('dir', 4);
+        $rows = q('SELECT id, sira FROM quiz_questions ORDER BY sira ASC, id ASC')->fetchAll();
+        $idx = null;
+        foreach ($rows as $i => $r) if ((int)$r['id'] === $id) { $idx = $i; break; }
+        if ($idx === null) fail('Soru bulunamadı.', 404);
+        $swapWith = $dir === 'up' ? $idx - 1 : $idx + 1;
+        if ($swapWith < 0 || $swapWith >= count($rows)) out(array('ok' => true));
+        $a = $rows[$idx]; $b2 = $rows[$swapWith];
+        q('UPDATE quiz_questions SET sira = ? WHERE id = ?', array($b2['sira'], $a['id']));
+        q('UPDATE quiz_questions SET sira = ? WHERE id = ?', array($a['sira'], $b2['id']));
+        out(array('ok' => true));
+
     /* ── ayarlar ── */
     case 'settings':
         require_admin(false);
