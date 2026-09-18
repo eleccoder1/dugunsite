@@ -4,7 +4,7 @@ body.admin{padding:0;font-size:18px;background:var(--mist)}
 .login{min-height:100svh;display:grid;place-items:center;padding:24px}
 .login-card{width:min(100%,380px);background:#fff;padding:34px 28px;box-shadow:0 30px 50px -30px rgba(50,42,34,.45);display:flex;flex-direction:column;gap:16px;text-align:center}
 .login-card .field{text-align:left}
-.login-crest{width:90px;margin:0 auto}
+.login-brand{margin:0;font-family:var(--display);font-size:.95rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-lo);line-height:1.6}
 
 .a-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:#fff}
 .a-head .brand{margin:0;font-family:var(--display);font-size:16px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;color:var(--ink)}

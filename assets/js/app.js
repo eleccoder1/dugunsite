@@ -169,9 +169,6 @@
   (function () {
     var f = $("#rsvpForm"), err = $(".form-err", f), done = $("#rsvpDone");
     var LABEL = { geliyor: "Katılacağınızı not ettik. Görüşmek üzere!", gelmiyor: "Katılamayacağınızı not ettik. Aklınız bizimle olsun.", belki: "Kararınızı verince buradan güncelleyebilirsiniz." };
-    function toggleGuests() { var st = (f.querySelector("input[name=status]:checked") || {}).value; $("#guestField").hidden = st !== "geliyor"; }
-    $$("input[name=status]", f).forEach(function (r) { r.addEventListener("change", toggleGuests); });
-    toggleGuests();
     function showDone(st) { f.hidden = true; done.hidden = false; $("#rsvpDoneText").textContent = LABEL[st] || ""; }
     var prev = store("ey_rsvp");
     if (prev) { try { prev = JSON.parse(prev); } catch (e) { prev = null; } }
@@ -180,7 +177,6 @@
       f.adults.value = String(prev.adults || 1);
       f.children.value = String(prev.children || 0);
       var r = f.querySelector('input[name=status][value="' + prev.status + '"]'); if (r) r.checked = true;
-      toggleGuests();
       cfgReady.then(function () { if (CFG.rsvp_open) showDone(prev.status); });
     }
     $("#rsvpEdit").addEventListener("click", function () { done.hidden = true; f.hidden = false; });

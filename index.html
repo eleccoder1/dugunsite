@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Marcellus&family=Pinyon+Script&display=swap&subset=latin-ext" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/site.css?v=2">
+<link rel="stylesheet" href="assets/css/site.css?v=5">
 </head>
 <body>
 
@@ -140,16 +140,16 @@
         <label class="field"><span>Adınız</span><input name="first_name" autocomplete="given-name" required maxlength="80"></label>
         <label class="field"><span>Soyadınız</span><input name="last_name" autocomplete="family-name" required maxlength="80"></label>
       </div>
+      <div class="grid2" id="guestField">
+        <label class="field"><span>Yetişkin sayısı</span><input type="number" name="adults" min="1" max="10" step="1" inputmode="numeric" value="1"></label>
+        <label class="field"><span>Çocuk sayısı</span><input type="number" name="children" min="0" max="10" step="1" inputmode="numeric" value="0"></label>
+      </div>
       <fieldset class="choice">
         <legend>Gelebilecek misiniz?</legend>
         <label><input type="radio" name="status" value="geliyor"><span>Katılacağım</span></label>
         <label><input type="radio" name="status" value="gelmiyor"><span>Katılamayacağım</span></label>
         <label><input type="radio" name="status" value="belki"><span>Henüz bilmiyorum</span></label>
       </fieldset>
-      <div class="grid2" id="guestField">
-        <label class="field"><span>Yetişkin sayısı</span><input type="number" name="adults" min="1" max="10" step="1" inputmode="numeric" value="1"></label>
-        <label class="field"><span>Çocuk sayısı</span><input type="number" name="children" min="0" max="10" step="1" inputmode="numeric" value="0"></label>
-      </div>
       <p class="form-err" role="alert"></p>
       <button class="btn btn-wide" type="submit">Yanıtımı gönder</button>
     </form>
@@ -263,10 +263,10 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="assets/js/site-config.js?v=2"></script>
-<script src="assets/js/app.js?v=2"></script>
-<script src="assets/js/flora.js?v=2"></script>
-<script src="assets/js/motion.js?v=2"></script>
-<script src="assets/js/muzik.js?v=2"></script>
+<script src="assets/js/site-config.js?v=5"></script>
+<script src="assets/js/app.js?v=5"></script>
+<script src="assets/js/flora.js?v=5"></script>
+<script src="assets/js/motion.js?v=5"></script>
+<script src="assets/js/muzik.js?v=5"></script>
 </body>
 </html>
