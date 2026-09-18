@@ -225,7 +225,6 @@ main{position:relative;z-index:2}
 .families>div:not(.sep){flex:1 1 220px;padding:.6rem 0}
 .families .sep{width:1px;align-self:stretch;background:var(--line)}
 @media (max-width:520px){.families .sep{width:60px;height:1px;flex:none;align-self:center}}
-.closing{background:linear-gradient(var(--sheet),rgba(255,255,255,.4))}
 .fam-n{font-family:var(--display);font-size:.9rem;letter-spacing:.16em;text-transform:uppercase}
 .fam-s{font-family:var(--script);font-size:2.6rem;line-height:1.2;color:var(--gold-lo)}
 
@@ -268,10 +267,12 @@ main{position:relative;z-index:2}
 .done-t{margin:0;font-family:var(--script);font-size:2.4rem;line-height:1.2;color:var(--gold-lo)}
 .closed-note{margin:2rem auto 0;color:var(--muted);font-style:italic}
 
-.closing{max-width:760px;margin:0 auto;padding:4.5rem 1.5rem 6rem;text-align:center;background:linear-gradient(var(--sheet),rgba(255,255,255,0))}
-.closing-t{margin:0;font-family:var(--script);font-size:clamp(2.8rem,11vw,4rem);line-height:1.2}
-.closing-n{margin:.4rem 0 .6rem;font-family:var(--display);font-size:1rem;letter-spacing:.2em;text-transform:uppercase}
-.closing-n em{font-family:var(--script);font-style:normal;text-transform:none;letter-spacing:0;font-size:1.6em}
+.closing{position:relative;width:100%;margin:0;padding:3.2rem 1.5rem 2.4rem;text-align:center;overflow:hidden;background:var(--mist);border-top:1px solid var(--gold-hi)}
+.closing-mono{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;gap:.25em;margin:0;font-family:var(--display);font-weight:400;font-size:min(38vw,22rem);line-height:1;color:var(--gold);opacity:.13;white-space:nowrap;pointer-events:none;z-index:0}
+.closing>*:not(.closing-mono){position:relative;z-index:1}
+.closing-t{margin:0;font-family:var(--script);font-size:clamp(2.2rem,9vw,3.2rem);line-height:1.2;color:var(--gold-lo)}
+.closing-n{margin:.3rem 0 .5rem;font-family:var(--display);font-weight:400;font-size:clamp(2rem,8vw,4rem);letter-spacing:.05em;text-transform:uppercase;line-height:1.1}
+.closing-n em{font-family:var(--script);font-style:normal;text-transform:none;letter-spacing:0;font-size:1.5em}
 
 /* anı defteri */
 .attach{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
@@ -349,7 +350,7 @@ main{position:relative;z-index:2}
 
 /* telefonda çiçekler metnin arkasında daha yumuşak */
 @media (max-width:899px){
-  .blk,.closing{margin-left:14px;margin-right:14px;background:rgba(255,255,255,.8)}
+  .blk{margin-left:14px;margin-right:14px;background:rgba(255,255,255,.8)}
   .blk.wide{margin:0;background:none}
   .blk{padding-left:1.25rem;padding-right:1.25rem}
   .marquee{margin:0 14px}
