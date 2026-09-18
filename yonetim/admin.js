@@ -74,13 +74,14 @@
     var rows = rsvp.filter(function (r) {
       return (!f || r.status === f) && (!q || (r.first_name + " " + r.last_name).toLocaleLowerCase("tr").indexOf(q) >= 0);
     });
-    var people = rows.reduce(function (s, r) { return s + (r.status === "geliyor" ? 1 + r.guests : 0); }, 0);
+    var people = rows.reduce(function (s, r) { return s + (r.status === "geliyor" ? r.adults + r.children : 0); }, 0);
     $("#rsvpSum").textContent = rows.length + " yanıt listeleniyor · bu listede gelecek toplam kişi: " + people;
-    $("#rsvpTable").innerHTML = "<thead><tr><th>Ad soyad</th><th>Durum</th><th>Kişi</th><th>Tarih</th><th></th></tr></thead><tbody>" +
+    $("#rsvpTable").innerHTML = "<thead><tr><th>Ad soyad</th><th>Durum</th><th>Yetişkin</th><th>Çocuk</th><th>Tarih</th><th></th></tr></thead><tbody>" +
       (rows.length ? rows.map(function (r) {
         return "<tr><td>" + esc(r.first_name + " " + r.last_name) + '</td><td><span class="pill ' + r.status + '">' + ST[r.status] + '</span></td><td class="num">' +
-          (r.status === "geliyor" ? 1 + r.guests : "–") + '</td><td class="num">' + fmtDate(r.updated_at) + '</td><td><button type="button" class="del" data-del="' + r.id + '">Sil</button></td></tr>';
-      }).join("") : '<tr><td colspan="5" class="muted">Henüz yanıt yok.</td></tr>') + "</tbody>";
+          (r.status === "geliyor" ? r.adults : "–") + '</td><td class="num">' + (r.status === "geliyor" ? r.children : "–") +
+          '</td><td class="num">' + fmtDate(r.updated_at) + '</td><td><button type="button" class="del" data-del="' + r.id + '">Sil</button></td></tr>';
+      }).join("") : '<tr><td colspan="6" class="muted">Henüz yanıt yok.</td></tr>') + "</tbody>";
   }
   $("#rsvpSearch").addEventListener("input", drawRsvp);
   $("#rsvpFilter").addEventListener("change", drawRsvp);
@@ -186,7 +187,7 @@
   var TOG = [
     ["rsvp_open", "Katılım formu açık", "Kapatınca misafirler yanıt gönderemez."],
     ["auto_wedding_day", "Düğün günü otomatik aç", "Açıkken anı defteri, albüm ve oyun düğün tarihinden (config.php > wedding_date) itibaren kendiliğinden açılır; aşağıdaki anahtarları erken açmak için yine kullanabilirsiniz."],
-    ["memories_open", "Anı defteri açık", "Kapatınca yeni mesaj yazılamaz; mevcutlar görünmeye devam eder."],
+    ["memories_open", "Anı Defteri açık", "Kapatınca yeni mesaj yazılamaz; mevcutlar görünmeye devam eder."],
     ["uploads_open", "Albüme yükleme açık", "Kapatınca misafirler dosya yükleyemez; albüm görünmeye devam eder."],
     ["oyun_open", "Oyun açık", "Kapatınca misafirler oyunu oynayamaz; sıralama görünmeye devam eder."],
     ["auto_approve", "Yeni içerikler hemen yayınlansın", "Kapatırsanız mesaj ve fotoğraflar siz onaylayana kadar gizli kalır."]

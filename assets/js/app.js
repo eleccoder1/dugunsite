@@ -42,7 +42,6 @@
   $$("[data-bind]").forEach(function (el) { el.textContent = get(S, el.getAttribute("data-bind")) || ""; });
   $$("[data-mono]").forEach(function (el) { el.textContent = S.monogram[+el.getAttribute("data-mono")]; });
   $("#cDavet").innerHTML = S.davetBaslik.map(esc).join("<br>");
-  $("#cAile").innerHTML = S.aileler.map(esc).join("<br>");
   $("#mapLink").href = S.mekan.harita;
   $("#webLink").href = S.mekan.web;
   if (!S.mekan.web) $("#webLink").hidden = true;
@@ -53,19 +52,9 @@
     return '<li><div class="tl-t">' + esc(p.saat) + '</div><div class="tl-d"></div><div><div class="tl-n">' + esc(p.baslik) + "</div>" + (p.aciklama ? '<div class="tl-s">' + esc(p.aciklama) + "</div>" : "") + "</div></li>";
   }).join("");
 
-  // harita (görünür olunca yüklenir)
-  (function () {
-    var box = $("#map");
-    var load = function () {
-      if (box.firstChild) return;
-      box.innerHTML = '<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Harita" src="https://www.google.com/maps?q=' +
-        encodeURIComponent(S.mekan.ad + ", " + S.mekan.adres) + '&output=embed"></iframe>';
-    };
-    if ("IntersectionObserver" in window) {
-      var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { load(); io.disconnect(); } }, { rootMargin: "300px" });
-      io.observe(box);
-    } else load();
-  })();
+  // harita (tarayıcının kendi "loading=lazy" özelliğiyle geciktirilir)
+  $("#map").innerHTML = '<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Harita" src="https://www.google.com/maps?q=' +
+    encodeURIComponent(S.mekan.ad + ", " + S.mekan.adres) + '&output=embed"></iframe>';
 
   /* ─── geri sayım ─── */
   var target = new Date(S.tarihISO).getTime();
@@ -81,9 +70,33 @@
   }
   tick(); setInterval(tick, 1000);
 
+  /* ─── takvime ekle ─── */
+  $("#calAdd").addEventListener("click", function () {
+    function icsDate(d) { return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z"; }
+    var start = new Date(S.tarihISO);
+    var end = new Date(start.getTime() + 5 * 3600 * 1000);
+    var lines = [
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//" + S.gelin + " " + S.damat + "//Dugun//TR", "CALSCALE:GREGORIAN",
+      "BEGIN:VEVENT",
+      "UID:" + randHex(16) + "@dugun",
+      "DTSTAMP:" + icsDate(new Date()),
+      "DTSTART:" + icsDate(start),
+      "DTEND:" + icsDate(end),
+      "SUMMARY:" + S.gelin + " ve " + S.damat + " Düğünü",
+      "LOCATION:" + (S.mekan.ad + ", " + S.mekan.adres).replace(/([,;])/g, "\\$1"),
+      "DESCRIPTION:Düğünümüze bekleriz!",
+      "END:VEVENT", "END:VCALENDAR"
+    ];
+    var blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a"); a.href = url; a.download = "dugun.ics"; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  });
+
   /* ─── sunucu ayarları ─── */
   var CFG = { rsvp_open: true, memories_open: true, uploads_open: true, oyun_open: true, max_upload_mb: 500, chunk_mb: 4 };
   var cfgReady = api("config").then(function (d) { CFG = d.config; applyCfg(); }).catch(function () { applyCfg(); });
+  function setNav(nav, show) { $$('[data-nav="' + nav + '"]').forEach(function (a) { a.style.display = show ? "" : "none"; }); }
   function applyCfg() {
     $("#memForm").hidden = !CFG.memories_open; $("#memClosed").hidden = CFG.memories_open;
     $("#drop").hidden = !CFG.uploads_open; $("#upClosed").hidden = CFG.uploads_open;
@@ -93,6 +106,9 @@
       var n = document.createElement("p"); n.className = "closed-note"; n.textContent = "Katılım bildirimi kapandı. Sorularınız için bizimle doğrudan iletişime geçebilirsiniz.";
       $("#katilim").appendChild(n);
     }
+    setNav("anilar", CFG.memories_open);
+    setNav("album", CFG.uploads_open);
+    setNav("oyun", CFG.oyun_open);
   }
 
   /* ─── sayfa yönlendirme ─── */
@@ -161,7 +177,8 @@
     if (prev) { try { prev = JSON.parse(prev); } catch (e) { prev = null; } }
     if (prev && prev.status) {
       ["first_name", "last_name"].forEach(function (k) { if (prev[k]) f[k].value = prev[k]; });
-      f.guests.value = String(prev.guests || 0);
+      f.adults.value = String(prev.adults || 1);
+      f.children.value = String(prev.children || 0);
       var r = f.querySelector('input[name=status][value="' + prev.status + '"]'); if (r) r.checked = true;
       toggleGuests();
       cfgReady.then(function () { if (CFG.rsvp_open) showDone(prev.status); });
@@ -170,7 +187,11 @@
     f.addEventListener("submit", function (e) {
       e.preventDefault(); err.textContent = "";
       var st = (f.querySelector("input[name=status]:checked") || {}).value;
-      var body = { first_name: f.first_name.value.trim(), last_name: f.last_name.value.trim(), status: st, guests: st === "geliyor" ? +f.guests.value : 0 };
+      var body = {
+        first_name: f.first_name.value.trim(), last_name: f.last_name.value.trim(), status: st,
+        adults: st === "geliyor" ? Math.max(1, +f.adults.value || 1) : 0,
+        children: st === "geliyor" ? Math.max(0, +f.children.value || 0) : 0
+      };
       if (!body.first_name || !body.last_name) { err.textContent = "Adınızı ve soyadınızı yazın."; return; }
       if (!st) { err.textContent = "Katılım durumunuzu seçin."; return; }
       var btn = f.querySelector("button[type=submit]"); btn.disabled = true; btn.textContent = "Gönderiliyor…";

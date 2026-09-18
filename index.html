@@ -54,7 +54,7 @@
     <a class="brand" href="#davetiye"><span data-bind="gelin"></span> <em>ve</em> <span data-bind="damat"></span></a>
     <nav class="toplinks" aria-label="Sayfalar">
       <a href="#davetiye" data-nav="davetiye">Davetiye</a>
-      <a href="#anilar" data-nav="anilar">Anı defteri</a>
+      <a href="#anilar" data-nav="anilar">Anı Defteri</a>
       <a href="#album" data-nav="album">Albüm</a>
       <a href="#oyun" data-nav="oyun">Oyun</a>
     </nav>
@@ -80,7 +80,6 @@
           <span class="nm" data-bind="damat" data-letters="5"></span>
         </h1>
         <p class="card-lead hero-rv" style="--hd:1.6s" id="cDavet"></p>
-        <p class="card-fam hero-rv" style="--hd:1.8s" id="cAile"></p>
         <div class="card-when hero-rv" style="--hd:2s">
           <p><span data-bind="tarihYazi"></span> <span data-bind="gunYazi"></span> <span class="dash">|</span> <span data-bind="saatYazi"></span></p>
           <p class="card-venue" data-bind="mekan.ad"></p>
@@ -104,8 +103,8 @@
   <section class="blk" id="gerisayim">
     <header class="sh" data-rv="up"><span class="sh-n">01</span><h2 class="sh-t">Büyük güne kalan</h2></header>
     <span class="rule" data-rv="line"></span>
-    <p class="lead" data-rv="up" data-bind="davetMesaji"></p>
-    <div class="count" id="count" aria-live="polite" data-rv="up" data-rv-delay="150"></div>
+    <div class="count" id="count" aria-live="polite" data-rv="up"></div>
+    <button type="button" class="btn btn-line" id="calAdd" data-rv="up" data-rv-delay="150">Takvime ekle</button>
   </section>
 
   <section class="blk">
@@ -147,9 +146,10 @@
         <label><input type="radio" name="status" value="gelmiyor"><span>Katılamayacağım</span></label>
         <label><input type="radio" name="status" value="belki"><span>Henüz bilmiyorum</span></label>
       </fieldset>
-      <label class="field" id="guestField"><span>Yanınızda kaç kişi gelecek?</span>
-        <select name="guests"><option value="0">Sadece ben</option><option value="1">+1 kişi</option><option value="2">+2 kişi</option><option value="3">+3 kişi</option><option value="4">+4 kişi</option><option value="5">+5 kişi</option><option value="6">+6 kişi</option></select>
-      </label>
+      <div class="grid2" id="guestField">
+        <label class="field"><span>Yetişkin sayısı</span><input type="number" name="adults" min="1" max="10" step="1" inputmode="numeric" value="1"></label>
+        <label class="field"><span>Çocuk sayısı</span><input type="number" name="children" min="0" max="10" step="1" inputmode="numeric" value="0"></label>
+      </div>
       <p class="form-err" role="alert"></p>
       <button class="btn btn-wide" type="submit">Yanıtımı gönder</button>
     </form>
@@ -170,7 +170,7 @@
 <!-- ═════════ ANI DEFTERİ ═════════ -->
 <div class="page" data-page="anilar" hidden>
   <section class="blk pagehead">
-    <header class="sh" data-rv="up"><h2 class="sh-t">Anı defteri</h2></header>
+    <header class="sh" data-rv="up"><h2 class="sh-t">Anı Defteri</h2></header>
     <span class="rule" data-rv="line"></span>
     <p class="muted" data-rv="up">Bize birkaç satır bırakın; yıllar sonra tekrar okuyacağız.</p>
     <form class="form" id="memForm" novalidate data-rv="up">
@@ -189,7 +189,7 @@
       <p class="form-err" role="alert"></p>
       <button class="btn btn-wide" type="submit">Mesajı gönder</button>
     </form>
-    <p class="closed-note" id="memClosed" hidden>Anı defteri şu an yeni mesajlara kapalı.</p>
+    <p class="closed-note" id="memClosed" hidden>Anı Defteri şu an yeni mesajlara kapalı.</p>
   </section>
   <section class="blk wide">
     <div class="notes" id="notes"></div>

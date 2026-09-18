@@ -31,14 +31,15 @@ switch ($a) {
         $status = in_str('status', 10);
         if ($first === '' || $last === '') fail('Adınızı ve soyadınızı yazın.');
         if (!in_array($status, array('geliyor', 'gelmiyor', 'belki'), true)) fail('Katılım durumunuzu seçin.');
-        $guests = $status === 'geliyor' ? in_int('guests', 0, 10) : 0;
+        $adults = $status === 'geliyor' ? in_int('adults', 1, 10, 1) : 0;
+        $children = $status === 'geliyor' ? in_int('children', 0, 10) : 0;
         $row = q('SELECT id FROM rsvp WHERE token_hash = ? LIMIT 1', array($gh))->fetch();
         if ($row) {
-            q('UPDATE rsvp SET first_name=?, last_name=?, status=?, guests=?, updated_at=NOW() WHERE id=?',
-                array($first, $last, $status, $guests, $row['id']));
+            q('UPDATE rsvp SET first_name=?, last_name=?, status=?, adults=?, children=?, updated_at=NOW() WHERE id=?',
+                array($first, $last, $status, $adults, $children, $row['id']));
         } else {
-            q('INSERT INTO rsvp (first_name, last_name, status, guests, token_hash, ip_hash, created_at, updated_at) VALUES (?,?,?,?,?,?,NOW(),NOW())',
-                array($first, $last, $status, $guests, $gh, ip_hash()));
+            q('INSERT INTO rsvp (first_name, last_name, status, adults, children, token_hash, ip_hash, created_at, updated_at) VALUES (?,?,?,?,?,?,?,NOW(),NOW())',
+                array($first, $last, $status, $adults, $children, $gh, ip_hash()));
         }
         out(array('ok' => true));
 
@@ -54,7 +55,7 @@ switch ($a) {
 
     case 'memory':
         method_post();
-        if (!section_open('memories_open')) fail('Anı defteri şu an kapalı.', 403);
+        if (!section_open('memories_open')) fail('Anı Defteri şu an kapalı.', 403);
         $gh = guest_hash();
         rate_limit('memory', 150, 3600);
         $name = in_str('name', 80);

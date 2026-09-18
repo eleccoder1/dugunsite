@@ -15,8 +15,7 @@ window.SITE = {
   gunYazi: "PAZAR",
   saatYazi: "19:00",
 
-  davetBaslik: ["DÜĞÜN TÖRENİMİZE", "DAVETLİSİNİZ"],
-  aileler: ["AKAY VE KÜÇÜK", "AİLELERİ"],
+  davetBaslik: ["Bu özel günümüzde sizleri de aramızda görmekten mutluluk duyarız."],
   aileDetay: [
     { isimler: "Nurten & Recep", soyad: "Akay" },
     { isimler: "Ayşegül & Muhammet", soyad: "Küçük" }
@@ -35,8 +34,6 @@ window.SITE = {
     { saat: "19:00", baslik: "Karşılama", aciklama: "" },
     { saat: "20:00", baslik: "Nikâh töreni", aciklama: "" }
   ],
-
-  davetMesaji: "Bu özel günümüzde sizleri de aramızda görmekten mutluluk duyarız.",
 
   // Quiz: "dogru" = doğru şıkkın sırası (0'dan başlar)
   quiz: [

@@ -55,7 +55,7 @@ switch ($a) {
         require_admin(false);
         $r = q("SELECT
                 SUM(status='geliyor') AS geliyor, SUM(status='gelmiyor') AS gelmiyor, SUM(status='belki') AS belki,
-                COALESCE(SUM(CASE WHEN status='geliyor' THEN 1 + guests ELSE 0 END),0) AS kisi,
+                COALESCE(SUM(CASE WHEN status='geliyor' THEN adults + children ELSE 0 END),0) AS kisi,
                 COUNT(*) AS toplam FROM rsvp")->fetch();
         $m = q('SELECT COUNT(*) AS n, COALESCE(SUM(approved=0),0) AS bekleyen FROM memories')->fetch();
         $md = q("SELECT COUNT(*) AS n, COALESCE(SUM(kind='image'),0) AS foto, COALESCE(SUM(kind='video'),0) AS video,
@@ -74,8 +74,8 @@ switch ($a) {
     /* ── katılım ── */
     case 'rsvp_list':
         require_admin(false);
-        $rows = q('SELECT id, first_name, last_name, status, guests, created_at, updated_at FROM rsvp ORDER BY id DESC')->fetchAll();
-        foreach ($rows as &$x) { $x['id'] = (int)$x['id']; $x['guests'] = (int)$x['guests']; }
+        $rows = q('SELECT id, first_name, last_name, status, adults, children, created_at, updated_at FROM rsvp ORDER BY id DESC')->fetchAll();
+        foreach ($rows as &$x) { $x['id'] = (int)$x['id']; $x['adults'] = (int)$x['adults']; $x['children'] = (int)$x['children']; }
         unset($x);
         out(array('ok' => true, 'items' => $rows));
 
@@ -87,18 +87,18 @@ switch ($a) {
 
     case 'rsvp_csv':
         require_admin(false);
-        $rows = q('SELECT first_name, last_name, status, guests, created_at, updated_at FROM rsvp ORDER BY last_name, first_name')->fetchAll();
+        $rows = q('SELECT first_name, last_name, status, adults, children, created_at, updated_at FROM rsvp ORDER BY last_name, first_name')->fetchAll();
         $label = array('geliyor' => 'Katılacak', 'gelmiyor' => 'Katılamayacak', 'belki' => 'Belirsiz');
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="katilim-listesi-' . date('Y-m-d') . '.csv"');
         header('Cache-Control: no-store');
         $o = fopen('php://output', 'w');
         fwrite($o, "\xEF\xBB\xBF"); // Excel'de Türkçe karakterler için
-        fputcsv($o, array('Ad', 'Soyad', 'Durum', 'Ek kişi', 'Toplam kişi', 'İlk yanıt', 'Son güncelleme'), ';');
+        fputcsv($o, array('Ad', 'Soyad', 'Durum', 'Yetişkin', 'Çocuk', 'Toplam kişi', 'İlk yanıt', 'Son güncelleme'), ';');
         foreach ($rows as $r) {
-            $total = $r['status'] === 'geliyor' ? 1 + (int)$r['guests'] : 0;
+            $total = $r['status'] === 'geliyor' ? (int)$r['adults'] + (int)$r['children'] : 0;
             $safe = array();
-            foreach (array($r['first_name'], $r['last_name'], $label[$r['status']], $r['guests'], $total, $r['created_at'], $r['updated_at']) as $v) {
+            foreach (array($r['first_name'], $r['last_name'], $label[$r['status']], $r['adults'], $r['children'], $total, $r['created_at'], $r['updated_at']) as $v) {
                 $v = (string)$v;
                 if ($v !== '' && strpos('=+-@', $v[0]) !== false) $v = "'" . $v; // Excel formül enjeksiyonuna karşı
                 $safe[] = $v;

@@ -7,8 +7,7 @@ body.admin{padding:0;font-size:18px;background:var(--mist)}
 .login-crest{width:90px;margin:0 auto}
 
 .a-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:#fff}
-.a-head .brand{font-family:var(--script);font-size:28px;line-height:1}
-.a-head .brand em{font-style:normal;color:var(--gold)}
+.a-head .brand{margin:0;font-family:var(--display);font-size:16px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;color:var(--ink)}
 .a-head-r{display:flex;gap:18px;align-items:center}
 .a-tabs{display:flex;gap:4px;overflow-x:auto;padding:0 16px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
 .a-tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:14px 12px;font-size:18px;color:var(--muted);cursor:pointer;white-space:nowrap}

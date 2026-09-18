@@ -173,8 +173,7 @@ main{position:relative;z-index:2}
 .hero-go .ch{animation:letter 1s var(--ease) calc(.35s + var(--base,0) * .1s + var(--i) * .06s) forwards}
 @keyframes letter{to{opacity:1;filter:blur(0);transform:none}}
 @keyframes fade-blur{from{opacity:0;filter:blur(10px)}to{opacity:1;filter:blur(0)}}
-.card-lead{margin:0 0 .9rem;font-size:clamp(.95rem,3.4vw,1.2rem);line-height:1.35}
-.card-fam{margin:0 0 .9rem;font-family:var(--display);font-size:clamp(.6rem,2.2vw,.78rem);letter-spacing:.16em;line-height:1.6}
+.card-lead{margin:0 0 1.9rem;font-size:clamp(.95rem,3.4vw,1.2rem);line-height:1.35}
 .card-when p{margin:0}
 .card-when>p:first-child{font-size:clamp(1rem,3.4vw,1.2rem)}
 .card-venue{font-family:var(--display);font-size:clamp(.68rem,2.5vw,.88rem);letter-spacing:.14em;text-transform:uppercase}
