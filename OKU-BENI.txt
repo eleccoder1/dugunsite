@@ -1,0 +1,40 @@
+YENİ TASARIM — DOSYALARIN YERİ
+==============================
+
+Bu klasörün içeriğini, proje klasörünüzün (C:\Users\Emre Akay\Desktop\Workspace\dugunsite)
+üzerine olduğu gibi kopyalayın. Klasör yapısı birebir aynıdır:
+
+  index.html                -> mevcut dosyanın üzerine yazılır
+  assets/css/site.css       -> mevcut dosyanın üzerine yazılır
+  assets/js/flora.js        -> YENİ dosya (çiçekleri çizer)
+  assets/js/motion.js       -> YENİ dosya (animasyonlar, geçişler)
+  assets/js/muzik.js        -> YENİ dosya (müzik çalar)
+  assets/audio/BENIOKU.txt  -> bilgi notu
+
+DEĞİŞMEYEN DOSYALAR
+-------------------
+assets/js/app.js, assets/js/site-config.js, api/ ve yonetim/ klasörleri aynı kalıyor.
+Metinleri (isimler, program saatleri, oyun soruları) yine site-config.js üzerinden değiştirirsiniz.
+
+ÖNEMLİ: ÖNCE PULL YAPIN
+-----------------------
+GitHub'daki depoya index.html dosyasının yeni hâlini zaten gönderdim (commit fb46bd4).
+Yerelde çalışmaya başlamadan önce "git pull" yapın, yoksa çakışma çıkar.
+
+MÜZİK
+-----
+Site, assets/audio/muzik.mp3 dosyası varsa onu çalar; yoksa tarayıcıda üretilen
+özgün piyano valsini çalar. Kendi şarkınızı koyacaksanız kullanım hakkına sahip olun.
+
+KÜÇÜK BİR HATA (isterseniz düzeltin)
+------------------------------------
+Mevcut assets/js/app.js dosyasında, siteye doğrudan #oyun adresiyle girildiğinde
+oyun yüklenmiyor. Sebebi route() fonksiyonunun "var Q = S.quiz" satırından önce
+çalışması. Çözüm: renderQuizStart fonksiyonunun ilk satırına şunu ekleyin:
+
+    Q = S.quiz;
+
+TEST
+----
+Dosyaları çift tıklayarak açmayın; PHP ve tarayıcı güvenliği nedeniyle boş görünür.
+Yerel sunucuda veya doğrudan sitede test edin.
