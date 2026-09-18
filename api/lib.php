@@ -175,6 +175,18 @@ function flag($k)
     return setting($k) === '1';
 }
 
+/* düğün gününden itibaren mi? (yerel saat, config.php > wedding_date) */
+function wedding_day_reached()
+{
+    return date('Y-m-d') >= (string)cfg('wedding_date');
+}
+
+/* bölüm açık mı? manuel anahtar açıksa, veya "düğün günü otomatik aç" açık ve gün gelmişse */
+function section_open($k)
+{
+    return flag($k) || (flag('auto_wedding_day') && wedding_day_reached());
+}
+
 function set_setting($k, $v)
 {
     q('INSERT INTO settings (k, v) VALUES (?, ?) ON DUPLICATE KEY UPDATE v = VALUES(v)', array($k, (string)$v));
@@ -232,6 +244,7 @@ function fmt_memory($r, $gh)
         'message' => $r['message'],
         'image' => file_url($r['image']),
         'approved' => (bool)$r['approved'],
+        'private' => (bool)$r['private'],
         'created_at' => $r['created_at'],
         'mine' => $gh !== '' && hash_equals($r['token_hash'], $gh),
     );
@@ -248,6 +261,7 @@ function fmt_media($r, $gh)
         'size' => (int)$r['size'],
         'uploader' => $r['uploader'],
         'approved' => (bool)$r['approved'],
+        'private' => (bool)$r['private'],
         'created_at' => $r['created_at'],
         'mine' => $gh !== '' && hash_equals($r['token_hash'], $gh),
     );

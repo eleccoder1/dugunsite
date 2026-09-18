@@ -51,8 +51,6 @@ if (installed()) {
                 last_name VARCHAR(80) NOT NULL,
                 status VARCHAR(10) NOT NULL,
                 guests TINYINT UNSIGNED NOT NULL DEFAULT 0,
-                phone VARCHAR(30) NOT NULL DEFAULT '',
-                note VARCHAR(500) NOT NULL DEFAULT '',
                 token_hash CHAR(64) NOT NULL,
                 ip_hash CHAR(64) NOT NULL,
                 created_at DATETIME NOT NULL,
@@ -65,10 +63,11 @@ if (installed()) {
                 message TEXT NOT NULL,
                 image VARCHAR(255) NULL,
                 approved TINYINT(1) NOT NULL DEFAULT 1,
+                private TINYINT(1) NOT NULL DEFAULT 0,
                 token_hash CHAR(64) NOT NULL,
                 ip_hash CHAR(64) NOT NULL,
                 created_at DATETIME NOT NULL,
-                KEY idx_approved (approved, id)
+                KEY idx_approved (approved, private, id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
             "CREATE TABLE IF NOT EXISTS media (
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -80,10 +79,11 @@ if (installed()) {
                 size BIGINT UNSIGNED NOT NULL,
                 uploader VARCHAR(80) NOT NULL,
                 approved TINYINT(1) NOT NULL DEFAULT 1,
+                private TINYINT(1) NOT NULL DEFAULT 0,
                 token_hash CHAR(64) NOT NULL,
                 ip_hash CHAR(64) NOT NULL,
                 created_at DATETIME NOT NULL,
-                KEY idx_approved (approved, id)
+                KEY idx_approved (approved, private, id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
             "CREATE TABLE IF NOT EXISTS quiz_scores (
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -103,7 +103,7 @@ if (installed()) {
         );
         try {
             foreach ($sql as $s) db()->exec($s);
-            foreach (array('rsvp_open' => '1', 'memories_open' => '1', 'uploads_open' => '1', 'auto_approve' => '1') as $k => $v) {
+            foreach (array('rsvp_open' => '1', 'memories_open' => '0', 'uploads_open' => '0', 'oyun_open' => '0', 'auto_wedding_day' => '1', 'auto_approve' => '1') as $k => $v) {
                 q('INSERT IGNORE INTO settings (k, v) VALUES (?, ?)', array($k, $v));
             }
             set_setting('admin_hash', password_hash($p1, PASSWORD_DEFAULT));

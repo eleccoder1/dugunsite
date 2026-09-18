@@ -36,7 +36,7 @@ window.SITE = {
     { saat: "20:00", baslik: "Nikâh töreni", aciklama: "" }
   ],
 
-  davetMesaji: "Bu güzel günde sevincimize ortak olmanız bizi çok mutlu eder.",
+  davetMesaji: "Bu özel günümüzde sizleri de aramızda görmekten mutluluk duyarız.",
 
   // Quiz: "dogru" = doğru şıkkın sırası (0'dan başlar)
   quiz: [

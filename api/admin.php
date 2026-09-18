@@ -74,7 +74,7 @@ switch ($a) {
     /* ── katılım ── */
     case 'rsvp_list':
         require_admin(false);
-        $rows = q('SELECT id, first_name, last_name, status, guests, phone, note, created_at, updated_at FROM rsvp ORDER BY id DESC')->fetchAll();
+        $rows = q('SELECT id, first_name, last_name, status, guests, created_at, updated_at FROM rsvp ORDER BY id DESC')->fetchAll();
         foreach ($rows as &$x) { $x['id'] = (int)$x['id']; $x['guests'] = (int)$x['guests']; }
         unset($x);
         out(array('ok' => true, 'items' => $rows));
@@ -87,18 +87,18 @@ switch ($a) {
 
     case 'rsvp_csv':
         require_admin(false);
-        $rows = q('SELECT first_name, last_name, status, guests, phone, note, created_at, updated_at FROM rsvp ORDER BY last_name, first_name')->fetchAll();
+        $rows = q('SELECT first_name, last_name, status, guests, created_at, updated_at FROM rsvp ORDER BY last_name, first_name')->fetchAll();
         $label = array('geliyor' => 'Katılacak', 'gelmiyor' => 'Katılamayacak', 'belki' => 'Belirsiz');
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="katilim-listesi-' . date('Y-m-d') . '.csv"');
         header('Cache-Control: no-store');
         $o = fopen('php://output', 'w');
         fwrite($o, "\xEF\xBB\xBF"); // Excel'de Türkçe karakterler için
-        fputcsv($o, array('Ad', 'Soyad', 'Durum', 'Ek kişi', 'Toplam kişi', 'Telefon', 'Not', 'İlk yanıt', 'Son güncelleme'), ';');
+        fputcsv($o, array('Ad', 'Soyad', 'Durum', 'Ek kişi', 'Toplam kişi', 'İlk yanıt', 'Son güncelleme'), ';');
         foreach ($rows as $r) {
             $total = $r['status'] === 'geliyor' ? 1 + (int)$r['guests'] : 0;
             $safe = array();
-            foreach (array($r['first_name'], $r['last_name'], $label[$r['status']], $r['guests'], $total, $r['phone'], $r['note'], $r['created_at'], $r['updated_at']) as $v) {
+            foreach (array($r['first_name'], $r['last_name'], $label[$r['status']], $r['guests'], $total, $r['created_at'], $r['updated_at']) as $v) {
                 $v = (string)$v;
                 if ($v !== '' && strpos('=+-@', $v[0]) !== false) $v = "'" . $v; // Excel formül enjeksiyonuna karşı
                 $safe[] = $v;
@@ -215,14 +215,15 @@ switch ($a) {
         require_admin(false);
         $s = settings();
         $o = array();
-        foreach (array('rsvp_open', 'memories_open', 'uploads_open', 'auto_approve') as $k) $o[$k] = $s[$k] === '1';
+        foreach (array('rsvp_open', 'memories_open', 'uploads_open', 'oyun_open', 'auto_wedding_day', 'auto_approve') as $k) $o[$k] = (isset($s[$k]) ? $s[$k] : '0') === '1';
+        $o['wedding_day_reached'] = wedding_day_reached();
         out(array('ok' => true, 'settings' => $o));
 
     case 'settings_set':
         method_post();
         require_admin();
         $k = in_str('key', 40);
-        if (!in_array($k, array('rsvp_open', 'memories_open', 'uploads_open', 'auto_approve'), true)) fail('Geçersiz ayar.');
+        if (!in_array($k, array('rsvp_open', 'memories_open', 'uploads_open', 'oyun_open', 'auto_wedding_day', 'auto_approve'), true)) fail('Geçersiz ayar.');
         set_setting($k, in_int('value', 0, 1));
         out(array('ok' => true));
 

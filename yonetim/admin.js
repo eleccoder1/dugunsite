@@ -76,12 +76,11 @@
     });
     var people = rows.reduce(function (s, r) { return s + (r.status === "geliyor" ? 1 + r.guests : 0); }, 0);
     $("#rsvpSum").textContent = rows.length + " yanıt listeleniyor · bu listede gelecek toplam kişi: " + people;
-    $("#rsvpTable").innerHTML = "<thead><tr><th>Ad soyad</th><th>Durum</th><th>Kişi</th><th>Telefon</th><th>Not</th><th>Tarih</th><th></th></tr></thead><tbody>" +
+    $("#rsvpTable").innerHTML = "<thead><tr><th>Ad soyad</th><th>Durum</th><th>Kişi</th><th>Tarih</th><th></th></tr></thead><tbody>" +
       (rows.length ? rows.map(function (r) {
         return "<tr><td>" + esc(r.first_name + " " + r.last_name) + '</td><td><span class="pill ' + r.status + '">' + ST[r.status] + '</span></td><td class="num">' +
-          (r.status === "geliyor" ? 1 + r.guests : "–") + '</td><td class="num">' + (r.phone ? '<a href="tel:' + esc(r.phone) + '">' + esc(r.phone) + "</a>" : "") +
-          '</td><td class="note-cell">' + esc(r.note) + '</td><td class="num">' + fmtDate(r.updated_at) + '</td><td><button type="button" class="del" data-del="' + r.id + '">Sil</button></td></tr>';
-      }).join("") : '<tr><td colspan="7" class="muted">Henüz yanıt yok.</td></tr>') + "</tbody>";
+          (r.status === "geliyor" ? 1 + r.guests : "–") + '</td><td class="num">' + fmtDate(r.updated_at) + '</td><td><button type="button" class="del" data-del="' + r.id + '">Sil</button></td></tr>';
+      }).join("") : '<tr><td colspan="5" class="muted">Henüz yanıt yok.</td></tr>') + "</tbody>";
   }
   $("#rsvpSearch").addEventListener("input", drawRsvp);
   $("#rsvpFilter").addEventListener("change", drawRsvp);
@@ -99,7 +98,7 @@
   function drawMems() {
     $("#memList").innerHTML = mems.length ? mems.map(function (m) {
       return '<div class="a-item' + (m.approved ? "" : " pending") + '">' + (m.image ? '<img src="' + esc(m.image) + '" alt="" data-view="' + esc(m.image) + '">' : "") +
-        '<div class="body"><div class="who">' + esc(m.name) + '</div><div class="msg">' + esc(m.message) + '</div><div class="meta">' + fmtDate(m.created_at) +
+        '<div class="body"><div class="who">' + esc(m.name) + (m.private ? ' <span class="tag-private">Sadece biz</span>' : "") + '</div><div class="msg">' + esc(m.message) + '</div><div class="meta">' + fmtDate(m.created_at) +
         (m.approved ? " · Yayında" : " · Onay bekliyor") + '</div><div class="acts">' +
         '<button type="button" data-mset="' + m.id + '" data-v="' + (m.approved ? 0 : 1) + '">' + (m.approved ? "Gizle" : "Onayla") + "</button>" +
         '<button type="button" class="danger" data-mdel="' + m.id + '">Sil</button></div></div></div>';
@@ -132,7 +131,8 @@
   function drawMedia() {
     $("#mediaGrid").innerHTML = med.length ? med.map(function (m, i) {
       return '<div class="a-tile' + (m.approved ? "" : " pending") + '"><button type="button" class="th" data-i="' + i + '">' +
-        (m.thumb ? '<img src="' + esc(m.thumb) + '" alt="" loading="lazy">' : "") + '<span class="tag">' + (m.kind === "video" ? "Video" : "Foto") + " · " + fmtSize(m.size) + "</span></button>" +
+        (m.thumb ? '<img src="' + esc(m.thumb) + '" alt="" loading="lazy">' : "") + '<span class="tag">' + (m.kind === "video" ? "Video" : "Foto") + " · " + fmtSize(m.size) + "</span>" +
+        (m.private ? '<span class="tag tag-private">Sadece biz</span>' : "") + "</button>" +
         '<div class="meta" title="' + esc(m.original_name) + '">' + esc(m.uploader) + " · " + fmtDate(m.created_at) + "</div>" +
         '<div class="acts"><a href="' + esc(m.url) + '" download="' + esc(m.original_name) + '">İndir</a>' +
         '<button type="button" data-set="' + i + '">' + (m.approved ? "Gizle" : "Onayla") + "</button>" +
@@ -185,15 +185,17 @@
   /* ─── ayarlar ─── */
   var TOG = [
     ["rsvp_open", "Katılım formu açık", "Kapatınca misafirler yanıt gönderemez."],
+    ["auto_wedding_day", "Düğün günü otomatik aç", "Açıkken anı defteri, albüm ve oyun düğün tarihinden (config.php > wedding_date) itibaren kendiliğinden açılır; aşağıdaki anahtarları erken açmak için yine kullanabilirsiniz."],
     ["memories_open", "Anı defteri açık", "Kapatınca yeni mesaj yazılamaz; mevcutlar görünmeye devam eder."],
     ["uploads_open", "Albüme yükleme açık", "Kapatınca misafirler dosya yükleyemez; albüm görünmeye devam eder."],
+    ["oyun_open", "Oyun açık", "Kapatınca misafirler oyunu oynayamaz; sıralama görünmeye devam eder."],
     ["auto_approve", "Yeni içerikler hemen yayınlansın", "Kapatırsanız mesaj ve fotoğraflar siz onaylayana kadar gizli kalır."]
   ];
   loaders.ayarlar = function () {
     api("settings").then(function (d) {
       $("#toggles").innerHTML = TOG.map(function (t) {
         return '<label class="toggle"><span>' + t[1] + "<small>" + t[2] + '</small></span><input type="checkbox" data-key="' + t[0] + '"' + (d.settings[t[0]] ? " checked" : "") + "></label>";
-      }).join("");
+      }).join("") + (d.settings.wedding_day_reached ? '<p class="muted small">Düğün günü gelmiş görünüyor.</p>' : '<p class="muted small">Düğün gününe daha var; otomatik açılış tarihi geldiğinde devreye girecek.</p>');
     }).catch(function (e) { toast(e.message); });
     drawQr();
   };
@@ -209,7 +211,7 @@
     $("#qrUrl").textContent = url;
     var box = $("#qr"); box.innerHTML = "";
     if (!window.QRCode) { box.textContent = "QR kütüphanesi yüklenemedi."; $("#qrDl").hidden = true; return; }
-    new window.QRCode(box, { text: url, width: 512, height: 512, colorDark: "#221E1B", colorLight: "#ffffff", correctLevel: window.QRCode.CorrectLevel.M });
+    new window.QRCode(box, { text: url, width: 512, height: 512, colorDark: "#3A3B37", colorLight: "#ffffff", correctLevel: window.QRCode.CorrectLevel.M });
   }
   $("#qrDl").addEventListener("click", function () {
     var c = $("#qr canvas"); if (!c) return;
