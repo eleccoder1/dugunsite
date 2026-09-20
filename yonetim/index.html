@@ -9,14 +9,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&display=swap&subset=latin-ext" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/site.css?v=1">
-<link rel="stylesheet" href="admin.css?v=1">
+<link rel="stylesheet" href="../assets/css/site.css?v=5">
+<link rel="stylesheet" href="admin.css?v=5">
 </head>
 <body class="admin">
 
 <div class="login marble" id="login" hidden>
   <form class="login-card" id="loginForm">
-    <img src="../assets/img/arma.svg" alt="" class="login-crest">
+    <p class="login-brand">Elif ve Yusuf Çağrı<br>Düğün Sitesi</p>
     <h1 class="h2">Yönetim paneli</h1>
     <label class="field"><span>Şifre</span><input type="password" name="password" autocomplete="current-password" required></label>
     <p class="form-err" role="alert"></p>
@@ -27,7 +27,7 @@
 
 <div class="app" id="app" hidden>
   <header class="a-head">
-    <p class="brand">Elif <em>&amp;</em> Yusuf Çağrı</p>
+    <p class="brand">Düğün Sitemiz</p>
     <div class="a-head-r">
       <a class="linkbtn" href="../" target="_blank" rel="noopener">Siteyi aç</a>
       <button type="button" class="linkbtn" id="logout">Çıkış</button>
@@ -36,7 +36,7 @@
   <nav class="a-tabs" id="tabs">
     <button type="button" data-tab="ozet" class="on">Özet</button>
     <button type="button" data-tab="katilim">Katılım</button>
-    <button type="button" data-tab="anilar">Anı defteri</button>
+    <button type="button" data-tab="anilar">Anı Defteri</button>
     <button type="button" data-tab="album">Albüm</button>
     <button type="button" data-tab="oyun">Oyun</button>
     <button type="button" data-tab="ayarlar">Ayarlar</button>
@@ -87,6 +87,12 @@
 
     <!-- OYUN -->
     <section data-panel="oyun" hidden>
+      <div class="a-box">
+        <h2 class="h3">Oyun soruları</h2>
+        <p class="muted small">Sorular, şıklar ve doğru cevap burada düzenlenir; misafirler oyunu bu haliyle oynar.</p>
+        <div id="quizQList"></div>
+        <button type="button" class="btn btn-sm" id="quizQAdd">+ Yeni soru ekle</button>
+      </div>
       <div class="a-bar"><button type="button" class="btn btn-sm btn-line" id="quizReset">Tüm skorları sıfırla</button></div>
       <div class="table-wrap"><table class="a-table" id="quizTable"></table></div>
     </section>
@@ -126,6 +132,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
-<script src="admin.js?v=1" defer></script>
+<script src="admin.js?v=5" defer></script>
 </body>
 </html>

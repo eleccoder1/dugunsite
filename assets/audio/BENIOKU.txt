@@ -1,0 +1,2 @@
+Kendi sarkinizi kullanmak icin bu klasore muzik.mp3 adiyla bir dosya koyun.
+Dosya yoksa site ozgun piyano valsini calar.

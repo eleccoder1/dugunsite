@@ -81,7 +81,7 @@ switch ($a) {
 
     case 'chunk':
         method_post();
-        if (!flag('uploads_open')) fail('Albüme yükleme şu an kapalı.', 403);
+        if (!section_open('uploads_open')) fail('Albüme yükleme şu an kapalı.', 403);
         $gh = guest_hash();
         list($part, $metaPath) = up_paths(isset($_GET['id']) ? (string)$_GET['id'] : '');
         $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : -1;
@@ -135,7 +135,7 @@ switch ($a) {
 
     case 'finish':
         method_post();
-        if (!flag('uploads_open')) fail('Albüme yükleme şu an kapalı.', 403);
+        if (!section_open('uploads_open')) fail('Albüme yükleme şu an kapalı.', 403);
         $gh = guest_hash();
         $b = body();
         list($part, $metaPath) = up_paths(isset($b['id']) ? (string)$b['id'] : '');
@@ -148,6 +148,7 @@ switch ($a) {
         $orig = in_str('name', 200);
         $uploader = in_str('uploader', 80);
         if ($uploader === '') $uploader = 'Misafir';
+        $private = in_int('private', 0, 1);
 
         $type = detect_type($part, $orig);
         if ($type === null) {
@@ -172,8 +173,8 @@ switch ($a) {
         }
 
         $approved = flag('auto_approve') ? 1 : 0;
-        q('INSERT INTO media (kind, path, thumb, original_name, mime, size, uploader, approved, token_hash, ip_hash, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,NOW())',
-            array($kind, $path, $thumb, $orig, $mime, $size, $uploader, $approved, $gh, ip_hash()));
+        q('INSERT INTO media (kind, path, thumb, original_name, mime, size, uploader, approved, private, token_hash, ip_hash, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,NOW())',
+            array($kind, $path, $thumb, $orig, $mime, $size, $uploader, $approved, $private, $gh, ip_hash()));
         $r = q('SELECT * FROM media WHERE id = ?', array(db()->lastInsertId()))->fetch();
         out(array('ok' => true, 'item' => fmt_media($r, $gh)));
 

@@ -55,7 +55,7 @@ switch ($a) {
         require_admin(false);
         $r = q("SELECT
                 SUM(status='geliyor') AS geliyor, SUM(status='gelmiyor') AS gelmiyor, SUM(status='belki') AS belki,
-                COALESCE(SUM(CASE WHEN status='geliyor' THEN 1 + guests ELSE 0 END),0) AS kisi,
+                COALESCE(SUM(CASE WHEN status='geliyor' THEN adults + children ELSE 0 END),0) AS kisi,
                 COUNT(*) AS toplam FROM rsvp")->fetch();
         $m = q('SELECT COUNT(*) AS n, COALESCE(SUM(approved=0),0) AS bekleyen FROM memories')->fetch();
         $md = q("SELECT COUNT(*) AS n, COALESCE(SUM(kind='image'),0) AS foto, COALESCE(SUM(kind='video'),0) AS video,
@@ -74,8 +74,8 @@ switch ($a) {
     /* ── katılım ── */
     case 'rsvp_list':
         require_admin(false);
-        $rows = q('SELECT id, first_name, last_name, status, guests, phone, note, created_at, updated_at FROM rsvp ORDER BY id DESC')->fetchAll();
-        foreach ($rows as &$x) { $x['id'] = (int)$x['id']; $x['guests'] = (int)$x['guests']; }
+        $rows = q('SELECT id, first_name, last_name, status, adults, children, created_at, updated_at FROM rsvp ORDER BY id DESC')->fetchAll();
+        foreach ($rows as &$x) { $x['id'] = (int)$x['id']; $x['adults'] = (int)$x['adults']; $x['children'] = (int)$x['children']; }
         unset($x);
         out(array('ok' => true, 'items' => $rows));
 
@@ -87,18 +87,18 @@ switch ($a) {
 
     case 'rsvp_csv':
         require_admin(false);
-        $rows = q('SELECT first_name, last_name, status, guests, phone, note, created_at, updated_at FROM rsvp ORDER BY last_name, first_name')->fetchAll();
+        $rows = q('SELECT first_name, last_name, status, adults, children, created_at, updated_at FROM rsvp ORDER BY last_name, first_name')->fetchAll();
         $label = array('geliyor' => 'Katılacak', 'gelmiyor' => 'Katılamayacak', 'belki' => 'Belirsiz');
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="katilim-listesi-' . date('Y-m-d') . '.csv"');
         header('Cache-Control: no-store');
         $o = fopen('php://output', 'w');
         fwrite($o, "\xEF\xBB\xBF"); // Excel'de Türkçe karakterler için
-        fputcsv($o, array('Ad', 'Soyad', 'Durum', 'Ek kişi', 'Toplam kişi', 'Telefon', 'Not', 'İlk yanıt', 'Son güncelleme'), ';');
+        fputcsv($o, array('Ad', 'Soyad', 'Durum', 'Yetişkin', 'Çocuk', 'Toplam kişi', 'İlk yanıt', 'Son güncelleme'), ';');
         foreach ($rows as $r) {
-            $total = $r['status'] === 'geliyor' ? 1 + (int)$r['guests'] : 0;
+            $total = $r['status'] === 'geliyor' ? (int)$r['adults'] + (int)$r['children'] : 0;
             $safe = array();
-            foreach (array($r['first_name'], $r['last_name'], $label[$r['status']], $r['guests'], $total, $r['phone'], $r['note'], $r['created_at'], $r['updated_at']) as $v) {
+            foreach (array($r['first_name'], $r['last_name'], $label[$r['status']], $r['adults'], $r['children'], $total, $r['created_at'], $r['updated_at']) as $v) {
                 $v = (string)$v;
                 if ($v !== '' && strpos('=+-@', $v[0]) !== false) $v = "'" . $v; // Excel formül enjeksiyonuna karşı
                 $safe[] = $v;
@@ -210,19 +210,83 @@ switch ($a) {
         db()->exec('DELETE FROM quiz_scores');
         out(array('ok' => true));
 
+    /* ── oyun soruları ── */
+    case 'quiz_questions_list':
+        require_admin(false);
+        $rows = q('SELECT id, soru, siklar, dogru, sira FROM quiz_questions ORDER BY sira ASC, id ASC')->fetchAll();
+        $items = array();
+        foreach ($rows as $r) {
+            $siklar = json_decode($r['siklar'], true);
+            $items[] = array(
+                'id' => (int)$r['id'], 'soru' => $r['soru'],
+                'siklar' => is_array($siklar) ? array_values($siklar) : array(),
+                'dogru' => (int)$r['dogru'], 'sira' => (int)$r['sira'],
+            );
+        }
+        out(array('ok' => true, 'items' => $items));
+
+    case 'quiz_question_save':
+        method_post();
+        require_admin();
+        $b = body();
+        $id = isset($b['id']) ? (int)$b['id'] : 0;
+        $soru = in_str('soru', 300);
+        $siklarIn = isset($b['siklar']) && is_array($b['siklar']) ? $b['siklar'] : array();
+        $siklar = array();
+        foreach ($siklarIn as $s) {
+            $s = clean_text(is_scalar($s) ? $s : '', 120);
+            if ($s !== '') $siklar[] = $s;
+        }
+        $dogru = isset($b['dogru']) && is_numeric($b['dogru']) ? (int)$b['dogru'] : -1;
+        if ($soru === '') fail('Soru metnini yazın.');
+        if (count($siklar) < 2 || count($siklar) > 6) fail('En az 2, en fazla 6 şık girin.');
+        if ($dogru < 0 || $dogru >= count($siklar)) fail('Doğru şıkkı seçin.');
+        $json = json_encode($siklar, JSON_UNESCAPED_UNICODE);
+        if ($id > 0 && q('SELECT id FROM quiz_questions WHERE id = ?', array($id))->fetch()) {
+            q('UPDATE quiz_questions SET soru=?, siklar=?, dogru=? WHERE id=?', array($soru, $json, $dogru, $id));
+        } else {
+            $maxSira = (int)q('SELECT COALESCE(MAX(sira),-1) FROM quiz_questions')->fetchColumn();
+            q('INSERT INTO quiz_questions (soru, siklar, dogru, sira, created_at) VALUES (?,?,?,?,NOW())', array($soru, $json, $dogru, $maxSira + 1));
+            $id = (int)db()->lastInsertId();
+        }
+        out(array('ok' => true, 'id' => $id));
+
+    case 'quiz_question_delete':
+        method_post();
+        require_admin();
+        q('DELETE FROM quiz_questions WHERE id = ?', array(in_int('id', 0, PHP_INT_MAX)));
+        out(array('ok' => true));
+
+    case 'quiz_question_move':
+        method_post();
+        require_admin();
+        $id = in_int('id', 0, PHP_INT_MAX);
+        $dir = in_str('dir', 4);
+        $rows = q('SELECT id, sira FROM quiz_questions ORDER BY sira ASC, id ASC')->fetchAll();
+        $idx = null;
+        foreach ($rows as $i => $r) if ((int)$r['id'] === $id) { $idx = $i; break; }
+        if ($idx === null) fail('Soru bulunamadı.', 404);
+        $swapWith = $dir === 'up' ? $idx - 1 : $idx + 1;
+        if ($swapWith < 0 || $swapWith >= count($rows)) out(array('ok' => true));
+        $a = $rows[$idx]; $b2 = $rows[$swapWith];
+        q('UPDATE quiz_questions SET sira = ? WHERE id = ?', array($b2['sira'], $a['id']));
+        q('UPDATE quiz_questions SET sira = ? WHERE id = ?', array($a['sira'], $b2['id']));
+        out(array('ok' => true));
+
     /* ── ayarlar ── */
     case 'settings':
         require_admin(false);
         $s = settings();
         $o = array();
-        foreach (array('rsvp_open', 'memories_open', 'uploads_open', 'auto_approve') as $k) $o[$k] = $s[$k] === '1';
+        foreach (array('rsvp_open', 'memories_open', 'uploads_open', 'oyun_open', 'auto_wedding_day', 'auto_approve') as $k) $o[$k] = (isset($s[$k]) ? $s[$k] : '0') === '1';
+        $o['wedding_day_reached'] = wedding_day_reached();
         out(array('ok' => true, 'settings' => $o));
 
     case 'settings_set':
         method_post();
         require_admin();
         $k = in_str('key', 40);
-        if (!in_array($k, array('rsvp_open', 'memories_open', 'uploads_open', 'auto_approve'), true)) fail('Geçersiz ayar.');
+        if (!in_array($k, array('rsvp_open', 'memories_open', 'uploads_open', 'oyun_open', 'auto_wedding_day', 'auto_approve'), true)) fail('Geçersiz ayar.');
         set_setting($k, in_int('value', 0, 1));
         out(array('ok' => true));
 

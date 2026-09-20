@@ -42,7 +42,6 @@
   $$("[data-bind]").forEach(function (el) { el.textContent = get(S, el.getAttribute("data-bind")) || ""; });
   $$("[data-mono]").forEach(function (el) { el.textContent = S.monogram[+el.getAttribute("data-mono")]; });
   $("#cDavet").innerHTML = S.davetBaslik.map(esc).join("<br>");
-  $("#cAile").innerHTML = S.aileler.map(esc).join("<br>");
   $("#mapLink").href = S.mekan.harita;
   $("#webLink").href = S.mekan.web;
   if (!S.mekan.web) $("#webLink").hidden = true;
@@ -53,19 +52,9 @@
     return '<li><div class="tl-t">' + esc(p.saat) + '</div><div class="tl-d"></div><div><div class="tl-n">' + esc(p.baslik) + "</div>" + (p.aciklama ? '<div class="tl-s">' + esc(p.aciklama) + "</div>" : "") + "</div></li>";
   }).join("");
 
-  // harita (görünür olunca yüklenir)
-  (function () {
-    var box = $("#map");
-    var load = function () {
-      if (box.firstChild) return;
-      box.innerHTML = '<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Harita" src="https://www.google.com/maps?q=' +
-        encodeURIComponent(S.mekan.ad + ", " + S.mekan.adres) + '&output=embed"></iframe>';
-    };
-    if ("IntersectionObserver" in window) {
-      var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { load(); io.disconnect(); } }, { rootMargin: "300px" });
-      io.observe(box);
-    } else load();
-  })();
+  // harita (tarayıcının kendi "loading=lazy" özelliğiyle geciktirilir)
+  $("#map").innerHTML = '<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Harita" src="https://www.google.com/maps?q=' +
+    encodeURIComponent(S.mekan.ad + ", " + S.mekan.adres) + '&output=embed"></iframe>';
 
   /* ─── geri sayım ─── */
   var target = new Date(S.tarihISO).getTime();
@@ -81,9 +70,33 @@
   }
   tick(); setInterval(tick, 1000);
 
+  /* ─── takvime ekle ─── */
+  $("#calAdd").addEventListener("click", function () {
+    function icsDate(d) { return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z"; }
+    var start = new Date(S.tarihISO);
+    var end = new Date(start.getTime() + 5 * 3600 * 1000);
+    var lines = [
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//" + S.gelin + " " + S.damat + "//Dugun//TR", "CALSCALE:GREGORIAN",
+      "BEGIN:VEVENT",
+      "UID:" + randHex(16) + "@dugun",
+      "DTSTAMP:" + icsDate(new Date()),
+      "DTSTART:" + icsDate(start),
+      "DTEND:" + icsDate(end),
+      "SUMMARY:" + S.gelin + " ve " + S.damat + " Düğünü",
+      "LOCATION:" + (S.mekan.ad + ", " + S.mekan.adres).replace(/([,;])/g, "\\$1"),
+      "DESCRIPTION:Düğünümüze bekleriz!",
+      "END:VEVENT", "END:VCALENDAR"
+    ];
+    var blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a"); a.href = url; a.download = "dugun.ics"; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  });
+
   /* ─── sunucu ayarları ─── */
-  var CFG = { rsvp_open: true, memories_open: true, uploads_open: true, max_upload_mb: 500, chunk_mb: 4 };
+  var CFG = { rsvp_open: true, memories_open: true, uploads_open: true, oyun_open: true, max_upload_mb: 500, chunk_mb: 4 };
   var cfgReady = api("config").then(function (d) { CFG = d.config; applyCfg(); }).catch(function () { applyCfg(); });
+  function setNav(nav, show) { $$('[data-nav="' + nav + '"]').forEach(function (a) { a.style.display = show ? "" : "none"; }); }
   function applyCfg() {
     $("#memForm").hidden = !CFG.memories_open; $("#memClosed").hidden = CFG.memories_open;
     $("#drop").hidden = !CFG.uploads_open; $("#upClosed").hidden = CFG.uploads_open;
@@ -93,6 +106,9 @@
       var n = document.createElement("p"); n.className = "closed-note"; n.textContent = "Katılım bildirimi kapandı. Sorularınız için bizimle doğrudan iletişime geçebilirsiniz.";
       $("#katilim").appendChild(n);
     }
+    setNav("anilar", CFG.memories_open);
+    setNav("album", CFG.uploads_open);
+    setNav("oyun", CFG.oyun_open);
   }
 
   /* ─── sayfa yönlendirme ─── */
@@ -108,7 +124,7 @@
       loaded[page] = true;
       if (page === "anilar") loadNotes(true);
       if (page === "album") loadGallery(true);
-      if (page === "oyun") { renderQuizStart(); loadBoard(); }
+      if (page === "oyun") { cfgReady.then(function () { if (CFG.oyun_open) loadQuestions().then(renderQuizStart); else $("#oyunClosed").hidden = false; loadBoard(); }); }
     }
   }
   window.addEventListener("hashchange", route);
@@ -153,24 +169,25 @@
   (function () {
     var f = $("#rsvpForm"), err = $(".form-err", f), done = $("#rsvpDone");
     var LABEL = { geliyor: "Katılacağınızı not ettik. Görüşmek üzere!", gelmiyor: "Katılamayacağınızı not ettik. Aklınız bizimle olsun.", belki: "Kararınızı verince buradan güncelleyebilirsiniz." };
-    function toggleGuests() { var st = (f.querySelector("input[name=status]:checked") || {}).value; $("#guestField").hidden = st !== "geliyor"; }
-    $$("input[name=status]", f).forEach(function (r) { r.addEventListener("change", toggleGuests); });
-    toggleGuests();
     function showDone(st) { f.hidden = true; done.hidden = false; $("#rsvpDoneText").textContent = LABEL[st] || ""; }
     var prev = store("ey_rsvp");
     if (prev) { try { prev = JSON.parse(prev); } catch (e) { prev = null; } }
     if (prev && prev.status) {
-      ["first_name", "last_name", "phone", "note"].forEach(function (k) { if (prev[k]) f[k].value = prev[k]; });
-      f.guests.value = String(prev.guests || 0);
+      ["first_name", "last_name"].forEach(function (k) { if (prev[k]) f[k].value = prev[k]; });
+      f.adults.value = String(prev.adults || 1);
+      f.children.value = String(prev.children || 0);
       var r = f.querySelector('input[name=status][value="' + prev.status + '"]'); if (r) r.checked = true;
-      toggleGuests();
       cfgReady.then(function () { if (CFG.rsvp_open) showDone(prev.status); });
     }
     $("#rsvpEdit").addEventListener("click", function () { done.hidden = true; f.hidden = false; });
     f.addEventListener("submit", function (e) {
       e.preventDefault(); err.textContent = "";
       var st = (f.querySelector("input[name=status]:checked") || {}).value;
-      var body = { first_name: f.first_name.value.trim(), last_name: f.last_name.value.trim(), status: st, guests: st === "geliyor" ? +f.guests.value : 0, phone: f.phone.value.trim(), note: f.note.value.trim() };
+      var body = {
+        first_name: f.first_name.value.trim(), last_name: f.last_name.value.trim(), status: st,
+        adults: st === "geliyor" ? Math.max(1, +f.adults.value || 1) : 0,
+        children: st === "geliyor" ? Math.max(0, +f.children.value || 0) : 0
+      };
       if (!body.first_name || !body.last_name) { err.textContent = "Adınızı ve soyadınızı yazın."; return; }
       if (!st) { err.textContent = "Katılım durumunuzu seçin."; return; }
       var btn = f.querySelector("button[type=submit]"); btn.disabled = true; btn.textContent = "Gönderiliyor…";
@@ -225,14 +242,16 @@
   $("#memForm").addEventListener("submit", function (e) {
     e.preventDefault();
     var f = this, err = $(".form-err", f); err.textContent = "";
-    var body = { name: f.author.value.trim(), message: f.message.value.trim(), photo: memPhotoData };
+    var priv = (f.querySelector('input[name=visibility]:checked') || {}).value === "ozel" ? 1 : 0;
+    var body = { name: f.author.value.trim(), message: f.message.value.trim(), photo: memPhotoData, private: priv };
     if (!body.name) { err.textContent = "Adınızı yazın."; return; }
     if (body.message.length < 2) { err.textContent = "Bir mesaj yazın."; return; }
     var btn = f.querySelector("button[type=submit]"); btn.disabled = true; btn.textContent = "Gönderiliyor…";
     api("memory", { body: body }).then(function (d) {
       rememberName(body.name);
       f.message.value = ""; memPhotoData = null; $("#memPreview").hidden = true; $("#memPhotoRemove").hidden = true;
-      if (d.item.approved) { notes.unshift(d.item); renderNotes(); toast("Mesajınız deftere eklendi."); }
+      if (d.item.approved && !d.item.private) { notes.unshift(d.item); renderNotes(); toast("Mesajınız deftere eklendi."); }
+      else if (d.item.private) toast("Mesajınız alındı. Yalnızca çift görebilecek.");
       else toast("Mesajınız alındı, onaylandıktan sonra görünecek.");
     }).catch(function (x) { err.textContent = x.message; })
       .then(function () { btn.disabled = false; btn.textContent = "Mesajı gönder"; });
@@ -304,6 +323,7 @@
     var name = $("#upName").value.trim();
     if (!name) { toast("Önce adınızı yazın, kimin yüklediğini bilelim."); $("#upName").focus(); return; }
     rememberName(name);
+    var priv = (document.querySelector('input[name=upVisibility]:checked') || {}).value === "ozel" ? 1 : 0;
     Array.prototype.forEach.call(fileList, function (file) {
       var li = document.createElement("li");
       li.innerHTML = '<div class="q-top"><span class="q-name"></span><span class="q-stat">Sırada</span></div><div class="q-bar"><i></i></div>';
@@ -312,7 +332,7 @@
       var ok = /^(image|video)\//.test(file.type) || /\.(jpe?g|png|webp|gif|heic|heif|mp4|mov|m4v|webm|3gp)$/i.test(file.name);
       if (!ok) return fail(li, "Desteklenmeyen dosya");
       if (file.size > CFG.max_upload_mb * 1048576) return fail(li, "En fazla " + CFG.max_upload_mb + " MB");
-      queue.push({ file: file, li: li, name: name });
+      queue.push({ file: file, li: li, name: name, private: priv });
     });
     if (!running) next();
   }
@@ -324,8 +344,8 @@
     if (!job) { running = false; return; }
     running = true; busy++;
     uploadOne(job).then(function (item) {
-      setProg(job.li, 100, item.approved ? "Yüklendi" : "Yüklendi, onay bekliyor");
-      if (item.approved) { media.unshift(item); renderGallery(); }
+      setProg(job.li, 100, item.private ? "Yüklendi, sadece çift görecek" : item.approved ? "Yüklendi" : "Yüklendi, onay bekliyor");
+      if (item.approved && !item.private) { media.unshift(item); renderGallery(); }
     }).catch(function (x) { fail(job.li, x.message || "Yüklenemedi"); })
       .then(function () { busy--; next(); });
   }
@@ -363,7 +383,7 @@
     }).then(function (thumb) {
       return fetch(UP + "?a=finish", {
         method: "POST", headers: { "X-Guest-Token": TOKEN, "Content-Type": "application/json" }, credentials: "same-origin",
-        body: JSON.stringify({ id: id, name: file.name, type: file.type, size: file.size, uploader: job.name, thumb: thumb })
+        body: JSON.stringify({ id: id, name: file.name, type: file.type, size: file.size, uploader: job.name, thumb: thumb, private: job.private })
       }).then(function (r) { return r.json(); });
     }).then(function (d) { if (!d.ok) throw new Error(d.error || "Kaydedilemedi"); return d.item; });
   }
@@ -415,8 +435,12 @@
   });
 
   /* ─── quiz ─── */
-  var Q = S.quiz, qi = 0, score = 0, player = "";
+  var Q = [], qi = 0, score = 0, player = "";
+  function loadQuestions() {
+    return api("quiz_questions").then(function (d) { Q = d.items; }).catch(function () { Q = []; });
+  }
   function renderQuizStart() {
+    if (!Q.length) { $("#quiz").innerHTML = '<p class="muted">Oyun için henüz soru eklenmemiş.</p>'; return; }
     var nm = esc(store("ey_name") || "");
     $("#quiz").innerHTML = '<p class="muted">' + Q.length + ' soru. Bakalım bizi ne kadar yakından tanıyorsunuz.</p>' +
       '<form class="form" id="qStart"><label class="field"><span>Adınız</span><input name="n" maxlength="60" value="' + nm + '" required></label>' +

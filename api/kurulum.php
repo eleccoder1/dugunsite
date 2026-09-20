@@ -50,9 +50,8 @@ if (installed()) {
                 first_name VARCHAR(80) NOT NULL,
                 last_name VARCHAR(80) NOT NULL,
                 status VARCHAR(10) NOT NULL,
-                guests TINYINT UNSIGNED NOT NULL DEFAULT 0,
-                phone VARCHAR(30) NOT NULL DEFAULT '',
-                note VARCHAR(500) NOT NULL DEFAULT '',
+                adults TINYINT UNSIGNED NOT NULL DEFAULT 1,
+                children TINYINT UNSIGNED NOT NULL DEFAULT 0,
                 token_hash CHAR(64) NOT NULL,
                 ip_hash CHAR(64) NOT NULL,
                 created_at DATETIME NOT NULL,
@@ -65,10 +64,11 @@ if (installed()) {
                 message TEXT NOT NULL,
                 image VARCHAR(255) NULL,
                 approved TINYINT(1) NOT NULL DEFAULT 1,
+                private TINYINT(1) NOT NULL DEFAULT 0,
                 token_hash CHAR(64) NOT NULL,
                 ip_hash CHAR(64) NOT NULL,
                 created_at DATETIME NOT NULL,
-                KEY idx_approved (approved, id)
+                KEY idx_approved (approved, private, id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
             "CREATE TABLE IF NOT EXISTS media (
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -80,10 +80,11 @@ if (installed()) {
                 size BIGINT UNSIGNED NOT NULL,
                 uploader VARCHAR(80) NOT NULL,
                 approved TINYINT(1) NOT NULL DEFAULT 1,
+                private TINYINT(1) NOT NULL DEFAULT 0,
                 token_hash CHAR(64) NOT NULL,
                 ip_hash CHAR(64) NOT NULL,
                 created_at DATETIME NOT NULL,
-                KEY idx_approved (approved, id)
+                KEY idx_approved (approved, private, id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
             "CREATE TABLE IF NOT EXISTS quiz_scores (
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -94,6 +95,15 @@ if (installed()) {
                 created_at DATETIME NOT NULL,
                 KEY idx_score (score, id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+            "CREATE TABLE IF NOT EXISTS quiz_questions (
+                id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                soru VARCHAR(300) NOT NULL,
+                siklar TEXT NOT NULL,
+                dogru TINYINT UNSIGNED NOT NULL DEFAULT 0,
+                sira INT NOT NULL DEFAULT 0,
+                created_at DATETIME NOT NULL,
+                KEY idx_sira (sira, id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
             "CREATE TABLE IF NOT EXISTS rate_limits (
                 id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 k VARCHAR(100) NOT NULL,
@@ -103,8 +113,21 @@ if (installed()) {
         );
         try {
             foreach ($sql as $s) db()->exec($s);
-            foreach (array('rsvp_open' => '1', 'memories_open' => '1', 'uploads_open' => '1', 'auto_approve' => '1') as $k => $v) {
+            foreach (array('rsvp_open' => '1', 'memories_open' => '0', 'uploads_open' => '0', 'oyun_open' => '0', 'auto_wedding_day' => '1', 'auto_approve' => '1') as $k => $v) {
                 q('INSERT IGNORE INTO settings (k, v) VALUES (?, ?)', array($k, $v));
+            }
+            $defaultQuiz = array(
+                array('İlk tanıştıkları yer neresi?', array('Okul', 'Kafe', 'Yıldız ailesi aracılığıyla :)', 'İş yeri'), 2),
+                array('"Nereye gidelim?" sorusuna 47 seçenek sunan kim?', array('Elif', 'Yusuf Çağrı', 'İkisi de'), 1),
+                array('Acıkınca karakteri değişen kim?', array('Elif', 'Yusuf Çağrı', 'İkisi de'), 0),
+                array('"Sadece bakacağız" deyip en çok alışveriş yapan kim?', array('Elif', 'Yusuf Çağrı', 'İkisi de'), 2),
+                array("Yusuf'un Elif'e en sık söylediği cümle hangisi?", array('Ne kadar sürer?', 'Nereye gidiyoruz?', 'Sen bilirsin', 'Ben hallederim'), 3),
+            );
+            if ((int)q('SELECT COUNT(*) FROM quiz_questions')->fetchColumn() === 0) {
+                foreach ($defaultQuiz as $i => $qd) {
+                    q('INSERT INTO quiz_questions (soru, siklar, dogru, sira, created_at) VALUES (?,?,?,?,NOW())',
+                        array($qd[0], json_encode($qd[1], JSON_UNESCAPED_UNICODE), $qd[2], $i));
+                }
             }
             set_setting('admin_hash', password_hash($p1, PASSWORD_DEFAULT));
             foreach (array('album', 'anilar', '.tmp') as $d) {

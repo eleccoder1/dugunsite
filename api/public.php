@@ -13,8 +13,9 @@ switch ($a) {
     case 'config':
         out(array('ok' => true, 'config' => array(
             'rsvp_open' => flag('rsvp_open'),
-            'memories_open' => flag('memories_open'),
-            'uploads_open' => flag('uploads_open'),
+            'memories_open' => section_open('memories_open'),
+            'uploads_open' => section_open('uploads_open'),
+            'oyun_open' => section_open('oyun_open'),
             'max_upload_mb' => (int)cfg('max_upload_mb', 500),
             'chunk_mb' => max(1, (int)cfg('chunk_mb', 4)),
         )));
@@ -30,16 +31,15 @@ switch ($a) {
         $status = in_str('status', 10);
         if ($first === '' || $last === '') fail('Adınızı ve soyadınızı yazın.');
         if (!in_array($status, array('geliyor', 'gelmiyor', 'belki'), true)) fail('Katılım durumunuzu seçin.');
-        $guests = $status === 'geliyor' ? in_int('guests', 0, 10) : 0;
-        $phone = in_str('phone', 30);
-        $note = in_str('note', 500, true);
+        $adults = $status === 'geliyor' ? in_int('adults', 1, 10, 1) : 0;
+        $children = $status === 'geliyor' ? in_int('children', 0, 10) : 0;
         $row = q('SELECT id FROM rsvp WHERE token_hash = ? LIMIT 1', array($gh))->fetch();
         if ($row) {
-            q('UPDATE rsvp SET first_name=?, last_name=?, status=?, guests=?, phone=?, note=?, updated_at=NOW() WHERE id=?',
-                array($first, $last, $status, $guests, $phone, $note, $row['id']));
+            q('UPDATE rsvp SET first_name=?, last_name=?, status=?, adults=?, children=?, updated_at=NOW() WHERE id=?',
+                array($first, $last, $status, $adults, $children, $row['id']));
         } else {
-            q('INSERT INTO rsvp (first_name, last_name, status, guests, phone, note, token_hash, ip_hash, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,NOW(),NOW())',
-                array($first, $last, $status, $guests, $phone, $note, $gh, ip_hash()));
+            q('INSERT INTO rsvp (first_name, last_name, status, adults, children, token_hash, ip_hash, created_at, updated_at) VALUES (?,?,?,?,?,?,?,NOW(),NOW())',
+                array($first, $last, $status, $adults, $children, $gh, ip_hash()));
         }
         out(array('ok' => true));
 
@@ -47,7 +47,7 @@ switch ($a) {
     case 'memories':
         $gh = guest_hash(false);
         $off = isset($_GET['offset']) ? max(0, (int)$_GET['offset']) : 0;
-        $rows = q('SELECT * FROM memories WHERE approved = 1 ORDER BY id DESC LIMIT ' . ($PAGE_NOTES + 1) . ' OFFSET ' . $off)->fetchAll();
+        $rows = q('SELECT * FROM memories WHERE approved = 1 AND private = 0 ORDER BY id DESC LIMIT ' . ($PAGE_NOTES + 1) . ' OFFSET ' . $off)->fetchAll();
         $more = count($rows) > $PAGE_NOTES;
         $items = array();
         foreach (array_slice($rows, 0, $PAGE_NOTES) as $r) $items[] = fmt_memory($r, $gh);
@@ -55,11 +55,12 @@ switch ($a) {
 
     case 'memory':
         method_post();
-        if (!flag('memories_open')) fail('Anı defteri şu an kapalı.', 403);
+        if (!section_open('memories_open')) fail('Anı Defteri şu an kapalı.', 403);
         $gh = guest_hash();
         rate_limit('memory', 150, 3600);
         $name = in_str('name', 80);
         $msg = in_str('message', 1500, true);
+        $private = in_int('private', 0, 1);
         if ($name === '') fail('Adınızı yazın.');
         if (strlen($msg) < 2) fail('Bir mesaj yazın.');
         $b = body();
@@ -69,8 +70,8 @@ switch ($a) {
             if ($img === null) fail('Fotoğraf kaydedilemedi. Farklı bir fotoğraf deneyin.');
         }
         $approved = flag('auto_approve') ? 1 : 0;
-        q('INSERT INTO memories (name, message, image, approved, token_hash, ip_hash, created_at) VALUES (?,?,?,?,?,?,NOW())',
-            array($name, $msg, $img, $approved, $gh, ip_hash()));
+        q('INSERT INTO memories (name, message, image, approved, private, token_hash, ip_hash, created_at) VALUES (?,?,?,?,?,?,?,NOW())',
+            array($name, $msg, $img, $approved, $private, $gh, ip_hash()));
         $r = q('SELECT * FROM memories WHERE id = ?', array(db()->lastInsertId()))->fetch();
         out(array('ok' => true, 'item' => fmt_memory($r, $gh)));
 
@@ -88,7 +89,7 @@ switch ($a) {
     case 'media':
         $gh = guest_hash(false);
         $off = isset($_GET['offset']) ? max(0, (int)$_GET['offset']) : 0;
-        $rows = q('SELECT * FROM media WHERE approved = 1 ORDER BY id DESC LIMIT ' . ($PAGE_MEDIA + 1) . ' OFFSET ' . $off)->fetchAll();
+        $rows = q('SELECT * FROM media WHERE approved = 1 AND private = 0 ORDER BY id DESC LIMIT ' . ($PAGE_MEDIA + 1) . ' OFFSET ' . $off)->fetchAll();
         $more = count($rows) > $PAGE_MEDIA;
         $items = array();
         foreach (array_slice($rows, 0, $PAGE_MEDIA) as $r) $items[] = fmt_media($r, $gh);
@@ -106,8 +107,19 @@ switch ($a) {
         out(array('ok' => true));
 
     /* ── quiz ── */
+    case 'quiz_questions':
+        $rows = q('SELECT id, soru, siklar, dogru FROM quiz_questions ORDER BY sira ASC, id ASC')->fetchAll();
+        $items = array();
+        foreach ($rows as $r) {
+            $siklar = json_decode($r['siklar'], true);
+            if (!is_array($siklar)) continue;
+            $items[] = array('id' => (int)$r['id'], 'soru' => $r['soru'], 'siklar' => array_values($siklar), 'dogru' => (int)$r['dogru']);
+        }
+        out(array('ok' => true, 'items' => $items));
+
     case 'quiz':
         method_post();
+        if (!section_open('oyun_open')) fail('Oyun şu an kapalı.', 403);
         rate_limit('quiz', 300, 3600);
         $name = in_str('name', 60);
         if ($name === '') fail('Adınızı yazın.');
