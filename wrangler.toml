@@ -1,0 +1,34 @@
+name = "dugunsite"
+main = "worker/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[[routes]]
+pattern = "elifyusufcagri.com/*"
+zone_name = "elifyusufcagri.com"
+
+[[routes]]
+pattern = "www.elifyusufcagri.com/*"
+zone_name = "elifyusufcagri.com"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dugunsite-db"
+database_id = "ba6044b2-c6af-461d-a4a3-114cb2d04bed"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "dugunsite-media"
+
+[vars]
+WEDDING_DATE = "2026-11-01"
+MAX_UPLOAD_MB = "100"
+CHUNK_MB = "8"
+MAX_TOTAL_STORAGE_BYTES = "10000000000"
+MEDIA_BASE_URL = "/media"

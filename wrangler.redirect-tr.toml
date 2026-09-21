@@ -1,0 +1,12 @@
+name = "dugunsite-tr-redirect"
+main = "worker/redirect-tr.js"
+compatibility_date = "2026-09-01"
+workers_dev = false
+
+[[routes]]
+pattern = "elifyusufcagri.com.tr/*"
+zone_name = "elifyusufcagri.com.tr"
+
+[[routes]]
+pattern = "www.elifyusufcagri.com.tr/*"
+zone_name = "elifyusufcagri.com.tr"
