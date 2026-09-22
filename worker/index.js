@@ -121,16 +121,19 @@ async function publicApi(req, env, url) {
     if (!sectionOpen(s, "memories_open", env)) return fail("Anı defteri şu an kapalı.", 403);
     const b = await body(req), gh = await guestHash(req, env), ip = await ipHash(req, env), name = clean(b.name, 80), message = clean(b.message, 1500), priv = b.private ? 1 : 0;
     if (!name || message.length < 2) return fail("Adınızı ve mesajınızı yazın.");
-    let image = null;
-    if (typeof b.photo === "string" && b.photo.startsWith("data:image/jpeg;base64,")) {
-      const raw = Uint8Array.from(atob(b.photo.slice(23)), (c) => c.charCodeAt(0));
-      if (raw.length > 6 * 1048576) return fail("Fotoğraf çok büyük.", 413);
-      image = `anilar/${crypto.randomUUID()}.jpg`; await env.MEDIA.put(image, raw, { httpMetadata: { contentType: "image/jpeg" } });
-    }
     const approved = s.auto_approve === "1" ? 1 : 0, t = now();
-    const out = await env.DB.prepare("INSERT INTO memories(name,message,image,approved,private,token_hash,ip_hash,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(name, message, image, approved, priv, gh, ip, t).run();
+    const out = await env.DB.prepare("INSERT INTO memories(name,message,image,approved,private,token_hash,ip_hash,created_at) VALUES(?,?,?,?,?,?,?,?)").bind(name, message, null, approved, priv, gh, ip, t).run();
     const row = await env.DB.prepare("SELECT * FROM memories WHERE id=?").bind(out.meta.last_row_id).first();
     return json({ ok: true, item: memoryItem(row, gh) });
+  }
+  if (action === "memory_update" && req.method === "POST") {
+    const b = await body(req), gh = await guestHash(req, env), id = integer(b.id, 0, 2147483647), message = clean(b.message, 1500);
+    if (message.length < 2) return fail("Bir mesaj yazın.");
+    const row = await env.DB.prepare("SELECT * FROM memories WHERE id=?").bind(id).first();
+    if (!row || row.token_hash !== gh) return fail("Bu mesajı yalnızca yazan kişi düzenleyebilir.", 403);
+    await env.DB.prepare("UPDATE memories SET message=? WHERE id=?").bind(message, id).run();
+    const updated = await env.DB.prepare("SELECT * FROM memories WHERE id=?").bind(id).first();
+    return json({ ok: true, item: memoryItem(updated, gh) });
   }
   if (action === "memory_delete" && req.method === "POST") {
     const b = await body(req), gh = await guestHash(req, env), row = await env.DB.prepare("SELECT * FROM memories WHERE id=?").bind(integer(b.id, 0, 2147483647)).first();

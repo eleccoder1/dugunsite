@@ -6,6 +6,10 @@ body.admin{padding:0;font-size:18px;background:var(--mist)}
 .login-card .field{text-align:left}
 .login-brand{margin:0;font-family:var(--display);font-size:.95rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-lo);line-height:1.6}
 
+.pw-wrap{position:relative}
+.pw-wrap input{width:100%;padding-right:74px}
+.pw-toggle{position:absolute;right:2px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--gold-lo);font-size:14px;letter-spacing:.04em;cursor:pointer;padding:6px 4px}
+
 .a-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:#fff}
 .a-head .brand{margin:0;font-family:var(--display);font-size:16px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;color:var(--ink)}
 .a-head-r{display:flex;gap:18px;align-items:center}

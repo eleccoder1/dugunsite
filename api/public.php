@@ -63,16 +63,22 @@ switch ($a) {
         $private = in_int('private', 0, 1);
         if ($name === '') fail('Adınızı yazın.');
         if (strlen($msg) < 2) fail('Bir mesaj yazın.');
-        $b = body();
-        $img = null;
-        if (!empty($b['photo'])) {
-            $img = save_jpeg_dataurl($b['photo'], 'anilar', (int)cfg('memory_photo_mb', 6) * 1048576);
-            if ($img === null) fail('Fotoğraf kaydedilemedi. Farklı bir fotoğraf deneyin.');
-        }
         $approved = flag('auto_approve') ? 1 : 0;
         q('INSERT INTO memories (name, message, image, approved, private, token_hash, ip_hash, created_at) VALUES (?,?,?,?,?,?,?,NOW())',
-            array($name, $msg, $img, $approved, $private, $gh, ip_hash()));
+            array($name, $msg, null, $approved, $private, $gh, ip_hash()));
         $r = q('SELECT * FROM memories WHERE id = ?', array(db()->lastInsertId()))->fetch();
+        out(array('ok' => true, 'item' => fmt_memory($r, $gh)));
+
+    case 'memory_update':
+        method_post();
+        $gh = guest_hash();
+        $id = in_int('id', 0, PHP_INT_MAX);
+        $msg = in_str('message', 1500, true);
+        if (strlen($msg) < 2) fail('Bir mesaj yazın.');
+        $r = q('SELECT * FROM memories WHERE id = ?', array($id))->fetch();
+        if (!$r || !hash_equals($r['token_hash'], $gh)) fail('Bu mesajı yalnızca yazan kişi düzenleyebilir.', 403);
+        q('UPDATE memories SET message = ? WHERE id = ?', array($msg, $id));
+        $r = q('SELECT * FROM memories WHERE id = ?', array($id))->fetch();
         out(array('ok' => true, 'item' => fmt_memory($r, $gh)));
 
     case 'memory_delete':

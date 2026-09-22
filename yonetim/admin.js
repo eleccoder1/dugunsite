@@ -11,6 +11,15 @@
   var toastT;
   function toast(m) { var t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove("show"); }, 3000); }
 
+  $$(".pw-toggle").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var inp = btn.previousElementSibling;
+      var show = inp.type === "password";
+      inp.type = show ? "text" : "password";
+      btn.textContent = show ? "Gizle" : "Göster";
+    });
+  });
+
   function api(action, body, query) {
     var init = { method: body ? "POST" : "GET", headers: {}, credentials: "same-origin" };
     if (body) { init.headers["Content-Type"] = "application/json"; init.body = JSON.stringify(body); }

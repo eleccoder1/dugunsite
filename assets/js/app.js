@@ -43,8 +43,8 @@
   $$("[data-mono]").forEach(function (el) { el.textContent = S.monogram[+el.getAttribute("data-mono")]; });
   $("#cDavet").innerHTML = S.davetBaslik.map(esc).join("<br>");
   $("#mapLink").href = S.mekan.harita;
-  $("#webLink").href = S.mekan.web;
-  if (!S.mekan.web) $("#webLink").hidden = true;
+  $("#damatEviLink").href = S.evler.damat;
+  $("#gelinEviLink").href = S.evler.gelin;
   $("#families").innerHTML = S.aileDetay.map(function (f, i) {
     return (i ? '<div class="sep"></div>' : "") + '<div><div class="fam-n">' + esc(f.isimler) + '</div><div class="fam-s">' + esc(f.soyad) + "</div></div>";
   }).join("");
@@ -155,15 +155,72 @@
   })();
 
   /* ─── isim hatırlama ─── */
-  function fillNames(n) {
-    [$("#memForm").author, $("#upName")].forEach(function (el) { if (el && !el.value.trim()) el.value = n; });
-  }
+  var nameListeners = [];
   function rememberName(n) {
     if (!n || !n.trim()) return;
     n = n.trim().slice(0, 80);
-    store("ey_name", n); fillNames(n);
+    store("ey_name", n);
+    nameListeners.forEach(function (fn) { fn(); });
   }
-  fillNames(store("ey_name") || "");
+  // İsim bir kez girilince tekrar sormaz: alanı gizleyip "Adınız: X · Değiştir" gösterir.
+  // "editing", yalnızca BU alanın o an odakta/düzenlemede olduğunu tutar; başka bir alanda
+  // girilen isim, odakta olmayan tüm alanları anında "bilinen" durumuna geçirir.
+  function nameField(input, wrap, known, shown, change) {
+    if (!input || !wrap || !known || !shown || !change) return;
+    var editing = false;
+    function render() {
+      var n = (store("ey_name") || "").trim();
+      if (n && !editing) {
+        if (!input.value.trim()) input.value = n;
+        shown.textContent = input.value.trim();
+        known.hidden = false; wrap.hidden = true;
+      } else {
+        known.hidden = true; wrap.hidden = false;
+      }
+    }
+    change.addEventListener("click", function () { editing = true; render(); input.focus(); input.select(); });
+    input.addEventListener("focus", function () { editing = true; });
+    // her tuşta anında kaydeder: diğer sayfalardaki alanlar hemen senkron olur.
+    input.addEventListener("input", function () { if (input.value.trim()) rememberName(input.value); });
+    input.addEventListener("blur", function () { editing = false; render(); });
+    nameListeners.push(render);
+    render();
+  }
+  nameField($("#memForm").author, $("#memNameField"), $("#memNameKnown"), $("#memNameShown"), $("#memNameChange"));
+  nameField($("#upName"), $("#upNameField"), $("#upNameKnown"), $("#upNameShown"), $("#upNameChange"));
+
+  // üst menüdeki isim rozeti (masaüstü) — tek yerden görüntüleme/değiştirme
+  (function () {
+    var chip = $("#nameChip");
+    if (!chip) return;
+    var editing = false;
+    function render() {
+      if (editing) return;
+      chip.textContent = (store("ey_name") || "").trim() || "Adınızı girin";
+    }
+    function openEditor() {
+      editing = true;
+      var input = document.createElement("input");
+      input.maxLength = 80; input.placeholder = "Adınız Soyadınız"; input.value = store("ey_name") || "";
+      chip.textContent = ""; chip.appendChild(input);
+      input.focus(); input.select();
+      function save() { if (input.value.trim()) rememberName(input.value); editing = false; render(); }
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); save(); }
+        if (e.key === "Escape") { editing = false; render(); }
+      });
+      input.addEventListener("blur", save);
+    }
+    chip.addEventListener("click", function () { if (!editing) openEditor(); });
+    nameListeners.push(render);
+    render();
+  })();
+  // isim gerekli olup boşsa, üst menüdeki rozeti aç; yoksa (mobil) alandaki girişe odaklan
+  function promptForName(fallbackInput) {
+    var chip = $("#nameChip");
+    if (chip && chip.offsetParent !== null) { chip.click(); chip.scrollIntoView({ block: "center", behavior: "smooth" }); }
+    else if (fallbackInput) fallbackInput.focus();
+  }
 
   /* ─── LCV ─── */
   (function () {
@@ -229,27 +286,17 @@
   }
 
   /* ─── anı defteri ─── */
-  var memPhotoData = null;
-  $("#memPhoto").addEventListener("change", function () {
-    var file = this.files[0]; this.value = "";
-    if (!file) return;
-    imageFileToJpeg(file, 1600, .85).then(function (d) {
-      memPhotoData = d; $("#memPreview").src = d; $("#memPreview").hidden = false; $("#memPhotoRemove").hidden = false;
-    }).catch(function () { toast("Bu fotoğraf açılamadı. JPG veya PNG bir fotoğraf seçin."); });
-  });
-  $("#memPhotoRemove").addEventListener("click", function () { memPhotoData = null; $("#memPreview").hidden = true; this.hidden = true; });
-
   $("#memForm").addEventListener("submit", function (e) {
     e.preventDefault();
     var f = this, err = $(".form-err", f); err.textContent = "";
     var priv = (f.querySelector('input[name=visibility]:checked') || {}).value === "ozel" ? 1 : 0;
-    var body = { name: f.author.value.trim(), message: f.message.value.trim(), photo: memPhotoData, private: priv };
-    if (!body.name) { err.textContent = "Adınızı yazın."; return; }
+    var body = { name: f.author.value.trim(), message: f.message.value.trim(), private: priv };
+    if (!body.name) { promptForName(f.author); err.textContent = "Lütfen önce adınızı girin."; return; }
     if (body.message.length < 2) { err.textContent = "Bir mesaj yazın."; return; }
     var btn = f.querySelector("button[type=submit]"); btn.disabled = true; btn.textContent = "Gönderiliyor…";
     api("memory", { body: body }).then(function (d) {
       rememberName(body.name);
-      f.message.value = ""; memPhotoData = null; $("#memPreview").hidden = true; $("#memPhotoRemove").hidden = true;
+      f.message.value = "";
       if (d.item.approved && !d.item.private) { notes.unshift(d.item); renderNotes(); toast("Mesajınız deftere eklendi."); }
       else if (d.item.private) toast("Mesajınız alındı. Yalnızca çift görebilecek.");
       else toast("Mesajınız alındı, onaylandıktan sonra görünecek.");
@@ -264,11 +311,19 @@
       notes = reset ? d.items : notes.concat(d.items); notesMore = d.more; renderNotes();
     }).catch(function (x) { toast(x.message); });
   }
+  var editingNoteId = null;
   function renderNotes() {
     $("#notes").innerHTML = notes.map(function (n, i) {
+      var editing = editingNoteId === n.id;
+      var body = editing
+        ? '<textarea class="note-edit" maxlength="1500" rows="4">' + esc(n.message) + "</textarea>" +
+          '<div class="row-btns note-edit-acts"><button type="button" class="btn btn-sm" data-save-note="' + n.id + '">Kaydet</button><button type="button" class="linkbtn" data-cancel-note="' + n.id + '">Vazgeç</button></div>'
+        : '<p class="note-m">' + esc(n.message) + "</p>";
       return '<article class="note">' + (n.image ? '<img src="' + esc(n.image) + '" alt="" loading="lazy" data-ni="' + i + '">' : "") +
-        '<p class="note-m">' + esc(n.message) + '</p><p class="note-n">' + esc(n.name) + "</p>" +
-        '<p class="note-d"><span>' + fmtDate(n.created_at) + "</span>" + (n.mine ? '<button type="button" data-del-note="' + n.id + '">Sil</button>' : "") + "</p></article>";
+        body + '<p class="note-n">' + esc(n.name) + "</p>" +
+        '<p class="note-d"><span>' + fmtDate(n.created_at) + "</span>" +
+        (n.mine && !editing ? '<span class="note-own"><button type="button" data-edit-note="' + n.id + '">Düzenle</button><button type="button" data-del-note="' + n.id + '">Sil</button></span>' : "") +
+        "</p></article>";
     }).join("");
     $("#notesEmpty").hidden = notes.length > 0;
     $("#notesMore").hidden = !notesMore;
@@ -280,6 +335,20 @@
       if (!confirm("Mesajınız silinsin mi?")) return;
       api("memory_delete", { body: { id: +id } }).then(function () {
         notes = notes.filter(function (n) { return n.id !== +id; }); renderNotes(); toast("Mesajınız silindi.");
+      }).catch(function (x) { toast(x.message); });
+      return;
+    }
+    var editId = e.target.getAttribute("data-edit-note");
+    if (editId) { editingNoteId = +editId; renderNotes(); return; }
+    var cancelId = e.target.getAttribute("data-cancel-note");
+    if (cancelId) { editingNoteId = null; renderNotes(); return; }
+    var saveId = e.target.getAttribute("data-save-note");
+    if (saveId) {
+      var article = e.target.closest(".note"), text = $(".note-edit", article).value.trim();
+      if (text.length < 2) { toast("Bir mesaj yazın."); return; }
+      api("memory_update", { body: { id: +saveId, message: text } }).then(function (d) {
+        notes = notes.map(function (n) { return n.id === +saveId ? d.item : n; });
+        editingNoteId = null; renderNotes(); toast("Mesajınız güncellendi.");
       }).catch(function (x) { toast(x.message); });
       return;
     }
@@ -321,7 +390,7 @@
   var queue = [], running = false;
   function enqueue(fileList) {
     var name = $("#upName").value.trim();
-    if (!name) { toast("Önce adınızı yazın, kimin yüklediğini bilelim."); $("#upName").focus(); return; }
+    if (!name) { promptForName($("#upName")); toast("Önce adınızı yazın, kimin yüklediğini bilelim."); return; }
     rememberName(name);
     var priv = (document.querySelector('input[name=upVisibility]:checked') || {}).value === "ozel" ? 1 : 0;
     Array.prototype.forEach.call(fileList, function (file) {
@@ -441,13 +510,15 @@
   }
   function renderQuizStart() {
     if (!Q.length) { $("#quiz").innerHTML = '<p class="muted">Oyun için henüz soru eklenmemiş.</p>'; return; }
-    var nm = esc(store("ey_name") || "");
     $("#quiz").innerHTML = '<p class="muted">' + Q.length + ' soru. Bakalım bizi ne kadar yakından tanıyorsunuz.</p>' +
-      '<form class="form" id="qStart"><label class="field"><span>Adınız</span><input name="n" maxlength="60" value="' + nm + '" required></label>' +
+      '<form class="form" id="qStart">' +
+      '<p class="name-known name-slot" id="qNameKnown" hidden>Adınız: <b id="qNameShown"></b> · <button type="button" class="linkbtn" id="qNameChange">Değiştir</button></p>' +
+      '<label class="field name-slot" id="qNameField"><span>Adınız</span><input name="n" maxlength="60" required></label>' +
       '<button class="btn btn-wide" type="submit">Oyuna başla</button></form>';
+    nameField($("#qStart").n, $("#qNameField"), $("#qNameKnown"), $("#qNameShown"), $("#qNameChange"));
     $("#qStart").addEventListener("submit", function (e) {
       e.preventDefault(); player = this.n.value.trim();
-      if (!player) { this.n.focus(); return; }
+      if (!player) { promptForName(this.n); return; }
       rememberName(player); qi = 0; score = 0; renderQ();
     });
   }

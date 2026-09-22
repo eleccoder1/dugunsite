@@ -121,6 +121,11 @@ main{position:relative;z-index:2}
   .toplinks a:hover{color:var(--ink)}
   .toplinks a.on{color:var(--ink)}
   .toplinks a.on::after{transform:scaleX(1)}
+  .topbar-r{display:flex;align-items:center;gap:1.8rem}
+  .name-chip{background:none;border:1px solid var(--line);padding:.35rem .9rem;font:inherit;font-size:.95rem;color:var(--muted);cursor:pointer;transition:border-color .3s,color .3s}
+  .name-chip:hover,.name-chip:focus-visible{color:var(--ink);border-color:var(--gold)}
+  .name-chip input{border:0;background:none;font:inherit;color:var(--ink);width:150px;outline:0;padding:0}
+  .name-slot{display:none}
   .tabbar{display:none!important}
 }
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(4,1fr);height:calc(var(--tabbar) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:rgba(255,255,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line)}
@@ -248,6 +253,8 @@ main{position:relative;z-index:2}
 .form{text-align:left;margin:2rem auto 0;max-width:480px;display:grid;gap:1.15rem}
 .grid2{display:grid;gap:1.15rem}
 @media (min-width:520px){.grid2{grid-template-columns:1fr 1fr}}
+.name-known{margin:0;font-size:1.02rem;color:var(--muted)}
+.name-known b{color:var(--ink);font-weight:600}
 .field{display:grid;gap:.3rem}
 .field>span{font-size:1.02rem;color:var(--muted)}
 .field i{font-size:.9em}
@@ -287,6 +294,10 @@ main{position:relative;z-index:2}
 .note-n{margin:.8rem 0 0;font-family:var(--script);font-size:1.9rem;line-height:1.1;color:var(--gold-lo)}
 .note-d{margin:.2rem 0 0;display:flex;justify-content:space-between;align-items:center;font-size:.9rem;color:var(--muted)}
 .note-d button{background:none;border:0;color:var(--err);cursor:pointer;text-decoration:underline;padding:.2rem}
+.note-own{display:flex;gap:.8rem}
+.note-own button[data-edit-note]{color:var(--ink)}
+.note-edit{width:100%;margin:.6rem 0 0;padding:.6rem .7rem;border:1px solid #CFCBC1;background:rgba(255,255,255,.6);font:inherit;font-style:italic;font-size:1.2rem;line-height:1.5;resize:vertical}
+.note-edit-acts{justify-content:flex-start;margin-top:.6rem}
 .empty{color:var(--muted);font-style:italic;margin:1rem 0 2rem;text-align:center}
 #notesMore,#galleryMore{display:flex;margin:1.2rem auto 0}
 
