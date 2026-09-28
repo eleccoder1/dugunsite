@@ -54,9 +54,19 @@
     return '<li><div class="tl-t">' + esc(p.saat) + '</div><div class="tl-d"></div><div><div class="tl-n">' + esc(p.baslik) + "</div>" + (p.aciklama ? '<div class="tl-s">' + esc(p.aciklama) + "</div>" : "") + "</div></li>";
   }).join("");
 
-  // harita (tarayıcının kendi "loading=lazy" özelliğiyle geciktirilir)
-  $("#map").innerHTML = '<iframe loading="eager" referrerpolicy="no-referrer-when-downgrade" title="Harita" src="https://www.google.com/maps?q=' +
-    encodeURIComponent(S.mekan.ad + ", " + S.mekan.adres) + '&output=embed"></iframe>';
+  // Harita salonla açılır; ev butonları aynı haritayı ilgili koordinata taşır.
+  function showMap(query, title) {
+    $("#map").innerHTML = '<iframe loading="eager" referrerpolicy="no-referrer-when-downgrade" title="' + esc(title || "Harita") + '" src="https://www.google.com/maps?q=' +
+      encodeURIComponent(query) + '&output=embed"></iframe>';
+  }
+  showMap(S.mekan.ad + ", " + S.mekan.adres, "Düğün salonu haritası");
+  [["damatEviLink", "40.714444,29.931639", "Damat evi haritası"], ["gelinEviLink", "40.792583,29.966833", "Gelin evi haritası"]].forEach(function (item) {
+    $("#" + item[0]).addEventListener("click", function (e) {
+      e.preventDefault();
+      showMap(item[1], item[2]);
+      $("#map").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
 
   /* ─── geri sayım ─── */
   var target = new Date(S.tarihISO).getTime();
