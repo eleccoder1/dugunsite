@@ -191,6 +191,7 @@ main{position:relative;z-index:2}
 .scroll-cue b{font-size:.68rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase}
 .scroll-cue span{display:block;width:1px;height:56px;background:var(--line);position:relative;overflow:hidden}
 .scroll-cue span::after{content:"";position:absolute;left:0;top:-40%;width:1px;height:40%;background:var(--gold);animation:cue 2.2s ease-in-out infinite}
+.section-cue{width:max-content;margin:3rem auto 0}
 @keyframes cue{to{top:100%}}
 
 /* ── kayan bant ── */
