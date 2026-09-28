@@ -1,8 +1,8 @@
 /* Elif & Yusuf Çağrı — arka plan müziği
-   assets/audio/muzik.mp3 varsa o çalar; yoksa tarayıcıda üretilen özgün bir piyano valsi çalar. */
+   Seçilen MP3 varsa onu çalar; yoksa tarayıcıda üretilen özgün bir piyano valsi çalar. */
 (function () {
   "use strict";
-  var FILE = "assets/audio/muzik.mp3";
+  var FILE = "assets/audio/in-the-death-car.mp3";
   var btn = document.getElementById("music");
   if (!btn) return;
   var label = btn.querySelector(".mu-label");
@@ -205,9 +205,5 @@
   setTimeout(function () { btn.classList.add("quiet"); }, 6000);
   btn.addEventListener("click", function () { btn.classList.remove("hint"); });
 
-  document.addEventListener("visibilitychange", function () {
-    if (document.hidden && state.playing) pause(true);
-    else if (!document.hidden && state.wanted && !state.playing) play();
-  });
   setUI(true);
 })();
