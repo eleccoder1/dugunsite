@@ -55,7 +55,7 @@
   }).join("");
 
   // harita (tarayıcının kendi "loading=lazy" özelliğiyle geciktirilir)
-  $("#map").innerHTML = '<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Harita" src="https://www.google.com/maps?q=' +
+  $("#map").innerHTML = '<iframe loading="eager" referrerpolicy="no-referrer-when-downgrade" title="Harita" src="https://www.google.com/maps?q=' +
     encodeURIComponent(S.mekan.ad + ", " + S.mekan.adres) + '&output=embed"></iframe>';
 
   /* ─── geri sayım ─── */
