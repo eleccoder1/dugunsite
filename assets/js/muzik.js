@@ -3,7 +3,7 @@
 (function () {
   "use strict";
   var FILE = "assets/audio/in-the-death-car.mp3";
-  var VOLUME = .385;
+  var VOLUME = .27;
   var btn = document.getElementById("music");
   if (!btn) return;
   var label = btn.querySelector(".mu-label");
