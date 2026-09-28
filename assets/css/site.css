@@ -192,6 +192,7 @@ main{position:relative;z-index:2}
 .scroll-cue span{display:block;width:1px;height:56px;background:var(--line);position:relative;overflow:hidden}
 .scroll-cue span::after{content:"";position:absolute;left:0;top:-40%;width:1px;height:40%;background:var(--gold);animation:cue 2.2s ease-in-out infinite}
 .section-cue{width:max-content;margin:3rem auto 0}
+.family-cue{flex:0 0 64px;margin:0;align-self:center}
 @keyframes cue{to{top:100%}}
 
 /* ── kayan bant ── */
@@ -200,6 +201,7 @@ main{position:relative;z-index:2}
 .marquee-track b{font-weight:400}
 .marquee-track i{width:7px;height:7px;background:var(--gold);transform:rotate(45deg);flex:none}
 @keyframes marquee{to{transform:translateX(-50%)}}
+@media (min-width:900px){#devam{scroll-margin-top:64px}}
 
 /* ── bölümler ── */
 .blk{position:relative;max-width:760px;margin:0 auto;padding:4.5rem 1.5rem;text-align:center;background:var(--sheet)}
@@ -232,7 +234,7 @@ main{position:relative;z-index:2}
 .families{display:flex;justify-content:center;align-items:center;gap:1.5rem;flex-wrap:wrap}
 .families>div:not(.sep){flex:1 1 220px;padding:.6rem 0}
 .families .sep{width:1px;align-self:stretch;background:var(--line)}
-@media (max-width:520px){.families .sep{width:60px;height:1px;flex:none;align-self:center}}
+@media (max-width:520px){.families .sep{width:60px;height:1px;flex:none;align-self:center}.family-cue{flex:none}}
 .fam-n{font-family:var(--display);font-size:.9rem;letter-spacing:.16em;text-transform:uppercase}
 .fam-s{font-family:var(--script);font-size:2.6rem;line-height:1.2;color:var(--gold-lo)}
 
