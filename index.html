@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Marcellus&family=Pinyon+Script&display=swap&subset=latin-ext" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/site.css?v=23">
+<link rel="stylesheet" href="assets/css/site.css?v=31">
 </head>
 <body>
 
@@ -90,13 +90,10 @@
       </div>
       <p class="card-sign hero-rv" style="--hd:2.3s">Davetlisiniz</p>
     </article>
-    <a class="scroll-cue hero-rv" style="--hd:2.6s" href="#gerisayim" aria-label="Aşağı kaydırın">
-      <span class="scroll-cue-txt">Kaydır</span>
-      <i class="scroll-cue-line"><span></span></i>
-    </a>
+    <a class="scroll-cue hero-rv" style="--hd:2.6s" href="#devam" aria-label="Kayan yazı ve geri sayıma kaydır"><b>Kaydır</b><span aria-hidden="true"></span></a>
   </section>
 
-  <div class="marquee" aria-hidden="true">
+  <div class="marquee" id="devam" aria-hidden="true">
     <div class="marquee-track">
       <span><b data-bind="gelin"></b> &amp; <b data-bind="damat"></b></span><i></i>
       <span data-bind="tarihYazi"></span><i></i>
@@ -112,29 +109,33 @@
     <button type="button" class="btn btn-line" id="calAdd" data-rv="up" data-rv-delay="150">Takvime ekle</button>
   </section>
 
-  <section class="blk">
+  <section class="blk" id="aileler">
     <header class="sh" data-rv="up"><span class="sh-n">02</span><h2 class="sh-t">Ailelerimiz</h2></header>
     <span class="rule" data-rv="line"></span>
     <div class="families" id="families"></div>
   </section>
 
-  <section class="blk">
+  <div class="section-divider" aria-hidden="true"></div>
+
+  <section class="blk" id="akis">
     <header class="sh" data-rv="up"><span class="sh-n">03</span><h2 class="sh-t">Günün akışı</h2></header>
     <span class="rule" data-rv="line"></span>
     <ol class="timeline" id="timeline"></ol>
+    <a class="scroll-cue section-cue" href="#mekan" aria-label="Mekân ve haritaya kaydır"><b>Kaydır</b><span aria-hidden="true"></span></a>
   </section>
 
-  <section class="blk">
+  <section class="blk" id="mekan">
     <header class="sh" data-rv="up"><span class="sh-n">04</span><h2 class="sh-t">Mekan</h2></header>
     <span class="rule" data-rv="line"></span>
     <p class="venue-big" data-rv="up" data-bind="mekan.ad"></p>
     <p class="muted" data-rv="up" data-bind="mekan.adres"></p>
-    <div class="map" id="map" data-rv="frame"></div>
+    <div class="map" id="map"></div>
     <div class="row-btns" data-rv="up">
       <button type="button" class="btn" id="mapLink" data-loc="mekan">Düğün mekanı</button>
       <button type="button" class="btn btn-line" id="damatEviLink" data-loc="damat">Damat evi</button>
       <button type="button" class="btn btn-line" id="gelinEviLink" data-loc="gelin">Gelin evi</button>
     </div>
+    <a class="scroll-cue section-cue" href="#katilim" aria-label="Katılım durumu ve kapanışa kaydır"><b>Kaydır</b><span aria-hidden="true"></span></a>
   </section>
 
   <section class="blk" id="katilim">
@@ -268,10 +269,10 @@
 <div class="idle-cue" id="idleCue" aria-hidden="true"><span>Kaydır</span></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="assets/js/site-config.js?v=23"></script>
-<script src="assets/js/app.js?v=23"></script>
-<script src="assets/js/flora.js?v=23"></script>
-<script src="assets/js/motion.js?v=23"></script>
-<script src="assets/js/muzik.js?v=23"></script>
+<script src="assets/js/site-config.js?v=31"></script>
+<script src="assets/js/app.js?v=31"></script>
+<script src="assets/js/flora.js?v=31"></script>
+<script src="assets/js/motion.js?v=31"></script>
+<script src="assets/js/muzik.js?v=31"></script>
 </body>
 </html>

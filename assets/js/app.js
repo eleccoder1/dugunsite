@@ -43,8 +43,10 @@
   $$("[data-mono]").forEach(function (el) { el.textContent = S.monogram[+el.getAttribute("data-mono")]; });
   $("#cDavet").innerHTML = S.davetBaslik.map(esc).join("<br>");
   $("#families").innerHTML = S.aileDetay.map(function (f, i) {
-    return (i ? '<div class="sep"></div>' : "") + '<div><div class="fam-n">' + esc(f.isimler) + '</div><div class="fam-s">' + esc(f.soyad) + "</div></div>";
+    return (i ? '<a class="scroll-cue family-cue" href="#aileler" aria-label="Ailelerimiz ve günün akışını birlikte göster"><b>Kaydır</b><span aria-hidden="true"></span></a>' : "") + '<div><div class="fam-n">' + esc(f.isimler) + '</div><div class="fam-s">' + esc(f.soyad) + "</div></div>";
   }).join("");
+  var familyCue = $(".family-cue");
+  if (familyCue) familyCue.addEventListener("click", function () { this.classList.add("departing"); });
   $("#timeline").innerHTML = S.program.map(function (p) {
     return '<li><div class="tl-t">' + esc(p.saat) + '</div><div class="tl-d"></div><div><div class="tl-n">' + esc(p.baslik) + "</div>" + (p.aciklama ? '<div class="tl-s">' + esc(p.aciklama) + "</div>" : "") + "</div></li>";
   }).join("");

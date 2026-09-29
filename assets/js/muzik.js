@@ -1,8 +1,9 @@
 /* Elif & Yusuf Çağrı — arka plan müziği
-   assets/audio/muzik.mp3 varsa o çalar; yoksa tarayıcıda üretilen özgün bir piyano valsi çalar. */
+   Seçilen MP3 varsa onu çalar; yoksa tarayıcıda üretilen özgün bir piyano valsi çalar. */
 (function () {
   "use strict";
-  var FILE = "assets/audio/muzik.mp3";
+  var FILE = "assets/audio/in-the-death-car.mp3";
+  var VOLUME = .27;
   var btn = document.getElementById("music");
   if (!btn) return;
   var label = btn.querySelector(".mu-label");
@@ -30,7 +31,7 @@
       state.audio.volume = 0;
     }
     var a = state.audio;
-    return a.play().then(function () { fadeEl(a, .55, 1800); });
+    return a.play().then(function () { fadeEl(a, VOLUME, 1800); });
   }
   function fadeEl(a, to, ms, done) {
     var from = a.volume, t0 = performance.now();
@@ -169,14 +170,20 @@
       .catch(function () { state.playing = false; setUI(); });
   }
 
-  function pause(keepWanted) {
+  function pause(keepWanted, immediate) {
     if (!keepWanted) state.wanted = false;
-    state.playing = false; setUI();
+    state.playing = false; setUI(keepWanted);
     if (state.mode === "file" && state.audio) {
       var a = state.audio;
-      fadeEl(a, 0, 600, function () { a.pause(); });
+      if (immediate) a.pause();
+      else fadeEl(a, 0, 600, function () { a.pause(); });
     } else if (state.ctx) {
       var ctx = state.ctx, g = state.master.gain;
+      if (immediate) {
+        clearInterval(state.timer);
+        ctx.suspend();
+        return;
+      }
       g.cancelScheduledValues(ctx.currentTime);
       g.setValueAtTime(Math.max(g.value, .0001), ctx.currentTime);
       g.exponentialRampToValueAtTime(.0001, ctx.currentTime + .6);
@@ -206,7 +213,7 @@
   btn.addEventListener("click", function () { btn.classList.remove("hint"); });
 
   document.addEventListener("visibilitychange", function () {
-    if (document.hidden && state.playing) pause(true);
+    if (document.hidden && state.playing) pause(true, true);
     else if (!document.hidden && state.wanted && !state.playing) play();
   });
 
