@@ -42,9 +42,6 @@
   $$("[data-bind]").forEach(function (el) { el.textContent = get(S, el.getAttribute("data-bind")) || ""; });
   $$("[data-mono]").forEach(function (el) { el.textContent = S.monogram[+el.getAttribute("data-mono")]; });
   $("#cDavet").innerHTML = S.davetBaslik.map(esc).join("<br>");
-  $("#mapLink").href = S.mekan.harita;
-  $("#damatEviLink").href = S.evler.damat;
-  $("#gelinEviLink").href = S.evler.gelin;
   $("#families").innerHTML = S.aileDetay.map(function (f, i) {
     return (i ? '<div class="sep"></div>' : "") + '<div><div class="fam-n">' + esc(f.isimler) + '</div><div class="fam-s">' + esc(f.soyad) + "</div></div>";
   }).join("");
@@ -52,9 +49,26 @@
     return '<li><div class="tl-t">' + esc(p.saat) + '</div><div class="tl-d"></div><div><div class="tl-n">' + esc(p.baslik) + "</div>" + (p.aciklama ? '<div class="tl-s">' + esc(p.aciklama) + "</div>" : "") + "</div></li>";
   }).join("");
 
-  // harita (tarayıcının kendi "loading=lazy" özelliğiyle geciktirilir)
-  $("#map").innerHTML = '<iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Harita" src="https://www.google.com/maps?q=' +
-    encodeURIComponent(S.mekan.ad + ", " + S.mekan.adres) + '&output=embed"></iframe>';
+  // harita: üç konum butonu (Düğün mekanı / Damat evi / Gelin evi) aynı haritayı kontrol eder
+  var LOCS = {
+    mekan: { q: S.mekan.ad + ", " + S.mekan.adres, title: "Düğün mekanı haritası" },
+    damat: { q: S.evler.damatKonum, title: "Damat evi haritası" },
+    gelin: { q: S.evler.gelinKonum, title: "Gelin evi haritası" }
+  };
+  var locBtns = $$(".row-btns [data-loc]");
+  function showLoc(key) {
+    var loc = LOCS[key];
+    $("#map").innerHTML = '<iframe loading="eager" referrerpolicy="no-referrer-when-downgrade" title="' + esc(loc.title) +
+      '" src="https://www.google.com/maps?q=' + encodeURIComponent(loc.q) + '&output=embed"></iframe>';
+    locBtns.forEach(function (b) {
+      var on = b.getAttribute("data-loc") === key;
+      b.classList.toggle("btn-line", !on);
+    });
+  }
+  locBtns.forEach(function (b) {
+    b.addEventListener("click", function () { showLoc(b.getAttribute("data-loc")); });
+  });
+  showLoc("mekan");
 
   /* ─── geri sayım ─── */
   var target = new Date(S.tarihISO).getTime();
@@ -151,7 +165,6 @@
       this.disabled = true;
       setTimeout(close, 1400);
     });
-    $("#introSkip").addEventListener("click", close);
   })();
 
   /* ─── isim hatırlama ─── */

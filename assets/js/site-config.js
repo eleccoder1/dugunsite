@@ -31,7 +31,9 @@ window.SITE = {
   // Gelin alma töreninde ev sahiplerine yol tarifi için
   evler: {
     damat: "https://maps.app.goo.gl/ixPk2wf3nh94bRZ79",
-    gelin: "https://maps.app.goo.gl/33Z1YRetyq7AN8Nw9"
+    damatKonum: "40.714447,29.93165",
+    gelin: "https://maps.app.goo.gl/33Z1YRetyq7AN8Nw9",
+    gelinKonum: "40.792578,29.966834"
   },
 
   program: [

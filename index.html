@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Marcellus&family=Pinyon+Script&display=swap&subset=latin-ext" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/site.css?v=18">
+<link rel="stylesheet" href="assets/css/site.css?v=23">
 </head>
 <body>
 
@@ -44,7 +44,6 @@
       </div>
     </div>
     <button type="button" class="btn btn-foil intro-open" id="introOpen">Davetiyeyi aç</button>
-    <button type="button" class="intro-skip" id="introSkip">Geç</button>
   </div>
 </div>
 
@@ -91,7 +90,10 @@
       </div>
       <p class="card-sign hero-rv" style="--hd:2.3s">Davetlisiniz</p>
     </article>
-    <a class="scroll-cue hero-rv" style="--hd:2.6s" href="#gerisayim" aria-label="Aşağı kaydırın"><span></span></a>
+    <a class="scroll-cue hero-rv" style="--hd:2.6s" href="#gerisayim" aria-label="Aşağı kaydırın">
+      <span class="scroll-cue-txt">Kaydır</span>
+      <i class="scroll-cue-line"><span></span></i>
+    </a>
   </section>
 
   <div class="marquee" aria-hidden="true">
@@ -123,15 +125,15 @@
   </section>
 
   <section class="blk">
-    <header class="sh" data-rv="up"><span class="sh-n">04</span><h2 class="sh-t">Mekân</h2></header>
+    <header class="sh" data-rv="up"><span class="sh-n">04</span><h2 class="sh-t">Mekan</h2></header>
     <span class="rule" data-rv="line"></span>
     <p class="venue-big" data-rv="up" data-bind="mekan.ad"></p>
     <p class="muted" data-rv="up" data-bind="mekan.adres"></p>
     <div class="map" id="map" data-rv="frame"></div>
     <div class="row-btns" data-rv="up">
-      <a class="btn" id="mapLink" target="_blank" rel="noopener">Yol tarifi al</a>
-      <a class="btn btn-line" id="damatEviLink" target="_blank" rel="noopener">Damat Evi</a>
-      <a class="btn btn-line" id="gelinEviLink" target="_blank" rel="noopener">Gelin Evi</a>
+      <button type="button" class="btn" id="mapLink" data-loc="mekan">Düğün mekanı</button>
+      <button type="button" class="btn btn-line" id="damatEviLink" data-loc="damat">Damat evi</button>
+      <button type="button" class="btn btn-line" id="gelinEviLink" data-loc="gelin">Gelin evi</button>
     </div>
   </section>
 
@@ -263,12 +265,13 @@
   </div>
 </div>
 
+<div class="idle-cue" id="idleCue" aria-hidden="true"><span>Kaydır</span></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="assets/js/site-config.js?v=18"></script>
-<script src="assets/js/app.js?v=18"></script>
-<script src="assets/js/flora.js?v=18"></script>
-<script src="assets/js/motion.js?v=18"></script>
-<script src="assets/js/muzik.js?v=18"></script>
+<script src="assets/js/site-config.js?v=23"></script>
+<script src="assets/js/app.js?v=23"></script>
+<script src="assets/js/flora.js?v=23"></script>
+<script src="assets/js/motion.js?v=23"></script>
+<script src="assets/js/muzik.js?v=23"></script>
 </body>
 </html>

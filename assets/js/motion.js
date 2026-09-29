@@ -126,4 +126,27 @@
     var html = t.innerHTML;
     t.innerHTML = html + html;
   });
+
+  /* ---------- uzun süre hareketsiz kalınca "kaydır" ipucu ---------- */
+  if (!reduce) {
+    var idleCue = document.getElementById("idleCue");
+    if (idleCue) {
+      var idleTimer = null;
+      function atBottom() {
+        return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 40;
+      }
+      function scheduleIdle() {
+        idleCue.classList.remove("show");
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(function () {
+          if (!atBottom()) idleCue.classList.add("show");
+        }, 5000);
+      }
+      ["scroll", "wheel", "touchstart", "mousemove", "keydown"].forEach(function (ev) {
+        window.addEventListener(ev, scheduleIdle, { passive: true });
+      });
+      window.addEventListener("hashchange", scheduleIdle);
+      scheduleIdle();
+    }
+  }
 })();
