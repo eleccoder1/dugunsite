@@ -3,6 +3,7 @@
 (function () {
   "use strict";
   var FILE = "assets/audio/muzik.mp3";
+  var MASTER_VOLUME = 0.4;
   var btn = document.getElementById("music");
   if (!btn) return;
   var label = btn.querySelector(".mu-label");
@@ -30,7 +31,7 @@
       state.audio.volume = 0;
     }
     var a = state.audio;
-    return a.play().then(function () { fadeEl(a, .55, 1800); });
+    return a.play().then(function () { fadeEl(a, MASTER_VOLUME, 1800); });
   }
   function fadeEl(a, to, ms, done) {
     var from = a.volume, t0 = performance.now();
@@ -153,7 +154,7 @@
       if (state.next < ctx.currentTime) state.next = ctx.currentTime + .1;
       g.cancelScheduledValues(ctx.currentTime);
       g.setValueAtTime(Math.max(g.value, .0001), ctx.currentTime);
-      g.exponentialRampToValueAtTime(.7, ctx.currentTime + 2);
+      g.exponentialRampToValueAtTime(MASTER_VOLUME, ctx.currentTime + 2);
       clearInterval(state.timer);
       state.timer = setInterval(scheduler, 200);
       scheduler();
