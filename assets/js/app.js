@@ -152,11 +152,13 @@
     if (seen || (h && h !== "davetiye")) return;
     intro.hidden = false;
     document.body.style.overflow = "hidden";
+    document.body.classList.add("intro-open");
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function close() {
       try { sessionStorage.setItem("ey_opened", "1"); } catch (e) {}
       intro.classList.add("out");
       document.body.style.overflow = "";
+      document.body.classList.remove("intro-open");
       setTimeout(function () { intro.hidden = true; }, reduce ? 0 : 800);
     }
     $("#introOpen").addEventListener("click", function () {
