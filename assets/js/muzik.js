@@ -7,7 +7,7 @@
   var btn = document.getElementById("music");
   if (!btn) return;
   var label = btn.querySelector(".mu-label");
-  var state = { playing: false, mode: null, audio: null, ctx: null, master: null, timer: null, next: 0, step: 0, wanted: false };
+  var state = { playing: false, mode: null, audio: null, ctx: null, master: null, timer: null, next: 0, step: 0, wanted: false, fadeId: 0 };
 
   function setUI(noSave) {
     btn.classList.toggle("on", state.playing);
@@ -34,8 +34,9 @@
     return a.play().then(function () { fadeEl(a, MASTER_VOLUME, 1800); });
   }
   function fadeEl(a, to, ms, done) {
-    var from = a.volume, t0 = performance.now();
+    var id = ++state.fadeId, from = a.volume, t0 = performance.now();
     (function step(t) {
+      if (id !== state.fadeId) return;
       var k = Math.min(1, (t - t0) / ms);
       a.volume = from + (to - from) * k;
       if (k < 1) requestAnimationFrame(step); else if (done) done();
@@ -164,6 +165,7 @@
   function play() {
     state.wanted = true;
     return fileCheck.then(function (hasFile) {
+      if (document.hidden) throw new Error("hidden");
       state.mode = hasFile ? "file" : "synth";
       return hasFile ? playFile().catch(function () { state.mode = "synth"; return playSynth(); }) : playSynth();
     }).then(function () { state.playing = true; setUI(); })
@@ -172,7 +174,7 @@
 
   function pause(keepWanted) {
     if (!keepWanted) state.wanted = false;
-    state.playing = false; setUI();
+    state.playing = false; setUI(keepWanted);
     if (state.mode === "file" && state.audio) {
       var a = state.audio;
       fadeEl(a, 0, 600, function () { a.pause(); });
@@ -183,6 +185,21 @@
       g.exponentialRampToValueAtTime(.0001, ctx.currentTime + .6);
       clearInterval(state.timer);
       setTimeout(function () { if (!state.playing) ctx.suspend(); }, 700);
+    }
+  }
+
+  function pauseForVisibility() {
+    state.playing = false;
+    setUI(true);
+    if (state.mode === "file" && state.audio) {
+      state.fadeId++;
+      state.audio.pause();
+      state.audio.volume = 0;
+    } else if (state.ctx) {
+      clearInterval(state.timer);
+      state.master.gain.cancelScheduledValues(state.ctx.currentTime);
+      state.master.gain.setValueAtTime(0.0001, state.ctx.currentTime);
+      state.ctx.suspend();
     }
   }
 
@@ -207,7 +224,7 @@
   btn.addEventListener("click", function () { btn.classList.remove("hint"); });
 
   document.addEventListener("visibilitychange", function () {
-    if (document.hidden && state.playing) pause(true);
+    if (document.hidden && (state.playing || state.wanted)) pauseForVisibility();
     else if (!document.hidden && state.wanted && !state.playing) play();
   });
 
