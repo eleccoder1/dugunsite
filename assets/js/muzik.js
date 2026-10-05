@@ -211,11 +211,5 @@
     else if (!document.hidden && state.wanted && !state.playing) play();
   });
 
-  // Davetiye dışındaki bir sekmeye geçilince müzik dursun, geri dönülünce kaldığı yerden devam etsin
-  window.addEventListener("hashchange", function () {
-    var h = (location.hash || "").replace("#", "");
-    if (h && h !== "davetiye") { if (state.playing) pause(true); }
-    else if (state.wanted && !state.playing) play();
-  });
   setUI(true);
 })();
